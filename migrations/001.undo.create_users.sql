@@ -1,0 +1,4 @@
+ALTER TABLE comments
+    DROP COLUMN uid;
+
+DROP TABLE IF EXISTS users; 

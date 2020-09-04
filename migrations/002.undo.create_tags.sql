@@ -1,0 +1,4 @@
+ALTER TABLE vid_tags
+    DROP COLUMN tag_id;
+
+DROP TABLE IF EXISTS tags; 

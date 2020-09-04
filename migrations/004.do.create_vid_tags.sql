@@ -1,0 +1,6 @@
+CREATE TABLE vid_tags (
+    vid INTEGER
+        REFERENCES videos(id) ON DELETE CASCADE NOT NULL,
+    tag_id INTEGER
+        REFERENCES tags(id) ON DELETE CASCADE NOT NULL
+);
