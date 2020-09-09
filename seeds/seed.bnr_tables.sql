@@ -10,12 +10,12 @@ TRUNCATE
     RESTART IDENTITY CASCADE
 ;
 
-INSERT INTO users (name, nickname, password)
+INSERT INTO users (name, password)
   VALUES
-    ('John Doe', null, '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu'),
-    ('Jane Doe', 'Janie', '$2a$12$cR/rZfYOHfQNrdrYfQVSRu1VDDq/uT511KwEaQupZtvATFJKS4M3G'),
-    ('Joe Thornton', 'Big Joe', '$2a$12$0T1b6teoGy1sfCZkMHf70.rEp/6su.08ly2PeRq7M30EhnRFugvcq'),
-    ('Brent Burns', null, '$2a$12$wSYt3vAoQcS1DiC.HwYUy.U1HvQ2jmSZGJIHGHeWAm3Hpwc3.vIza')
+    ('John Doe', '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu'),
+    ('Jane Doe', '$2a$12$cR/rZfYOHfQNrdrYfQVSRu1VDDq/uT511KwEaQupZtvATFJKS4M3G'),
+    ('Joe Thornton', '$2a$12$0T1b6teoGy1sfCZkMHf70.rEp/6su.08ly2PeRq7M30EhnRFugvcq'),
+    ('Brent Burns', '$2a$12$wSYt3vAoQcS1DiC.HwYUy.U1HvQ2jmSZGJIHGHeWAm3Hpwc3.vIza')
 ;
 
 INSERT INTO tags (tag)
