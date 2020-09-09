@@ -22,7 +22,7 @@ describe('Users Endpoints', function() {
 
   afterEach('cleanup',() => db.raw('TRUNCATE users RESTART IDENTITY CASCADE'));
 
-  describe.only(`GET /api/users`, () => {
+  describe(`GET /api/users`, () => {
     context(`Given no users`, () => {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
@@ -99,7 +99,7 @@ describe('Users Endpoints', function() {
     context(`Given an XSS attack content`, () => {
       const { maliciousUser, expectedUser } = makeMaliciousUser();
 
-      beforeEach('insert malicious destination', () => {
+      beforeEach('insert malicious user', () => {
         return db
           .into('users')
           .insert(maliciousUser)
