@@ -4,7 +4,7 @@ const { makeVidTagsArray, makeMaliciousVidTag } = require('./vid-tags.fixtures')
 const { makeTagsArray } = require('./tags.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 
-describe.only('Video Tags Endpoints', function() {
+describe('Video Tags Endpoints', function() {
   let db;
 
   before('make knex instance', () => {

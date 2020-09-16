@@ -54,7 +54,7 @@ INSERT INTO vid_tags (vid_id, tag_id)
     (8, 2)
 ;
 
-INSERT INTO vid_resources (description, link, vid)
+INSERT INTO vid_resources (description, link, vid_id)
   VALUES
     ('This link was really useful', 'https://www.google.com/', 1),
     ('This link was also super insightful', 'https://www.google.com/', 1),
@@ -71,7 +71,7 @@ INSERT INTO vid_resources (description, link, vid)
     ('Be sure to check this out for extra reading', 'https://www.google.com/', 8)
 ;
 
-INSERT INTO comments (comment, date_posted, uid, vid)
+INSERT INTO comments (comment, date_posted, uid, vid_id)
   VALUES
     ('This video rocks!!', '2020-08-01', 1, 3),
     ('Such a good video!  Very interesting!', '2020-09-01', 3, 3),
