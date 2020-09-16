@@ -37,7 +37,7 @@ INSERT INTO videos (title, date_posted, description, embed_code)
     ('Economics Video 3', '2020-03-27', 'A video discussing matters of economics and politics', '<iframe width="560" height="315" src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
 ;
 
-INSERT INTO vid_tags (vid, tag_id)
+INSERT INTO vid_tags (vid_id, tag_id)
   VALUES
     (1, 1),
     (2, 1),
@@ -45,7 +45,6 @@ INSERT INTO vid_tags (vid, tag_id)
     (3, 1),
     (3, 3),
     (4, 3),
-    (5, 2),
     (5, 2),
     (6, 2),
     (7, 1),

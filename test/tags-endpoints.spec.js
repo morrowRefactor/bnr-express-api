@@ -3,7 +3,7 @@ const app = require('../src/app');
 const { makeTagsArray, makeMaliciousTag } = require('./tags.fixtures');
 const { expect } = require('chai');
 
-describe.only('Tags Endpoints', function() {
+describe('Tags Endpoints', function() {
   let db;
 
   before('make knex instance', () => {
