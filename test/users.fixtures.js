@@ -4,25 +4,25 @@ function makeUsersArray() {
             id: 1,
             name: 'John Doe',
             password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
-            joined_date: new Date('2029-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
+            joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 2,
             name: 'Jane Doe',
             password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
-            joined_date: new Date('2029-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
+            joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 3,
             name: 'Joe Thornton',
             password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
-            joined_date: new Date('2029-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
+            joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 4,
             name: 'Brent Burns',
             password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
-            joined_date: new Date('2029-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
+            joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         }
     ];
 };

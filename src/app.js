@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const usersRouter = require('./users/users-router');
 const tagsRouter = require('./tags/tags-router');
+const videosRouter = require('./videos/videos-router');
+const vidTagsRouter = require('./vid-tags/vid-tags-router');
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use(cors());
 
 app.use('/api/users', usersRouter);
 app.use('/api/tags', tagsRouter);
+app.use('/api/videos', videosRouter);
+app.use('/api/vid-tags', vidTagsRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')

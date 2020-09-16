@@ -9,10 +9,10 @@ ALTER TABLE vid_tags
 DROP TABLE IF EXISTS tags; 
 
 ALTER TABLE vid_tags
-    DROP COLUMN vid;
+    DROP COLUMN vid_id;
 
 ALTER TABLE vid_resources
-    DROP COLUMN vid;
+    DROP COLUMN vid_id;
 
 ALTER TABLE comments
     DROP COLUMN vid;
