@@ -15,7 +15,7 @@ ALTER TABLE vid_resources
     DROP COLUMN vid_id;
 
 ALTER TABLE comments
-    DROP COLUMN vid;
+    DROP COLUMN vid_id;
 
 DROP TABLE IF EXISTS videos; 
 

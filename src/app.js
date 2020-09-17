@@ -9,6 +9,7 @@ const tagsRouter = require('./tags/tags-router');
 const videosRouter = require('./videos/videos-router');
 const vidTagsRouter = require('./vid-tags/vid-tags-router');
 const vidResourcesRouter = require('./vid-resources/vid-resources-router');
+const commentsRouter = require('./comments/comments-router');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/tags', tagsRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/vid-tags', vidTagsRouter);
 app.use('/api/vid-resources', vidResourcesRouter);
+app.use('/api/comments', commentsRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')
