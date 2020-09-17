@@ -3,7 +3,7 @@ const app = require('../src/app');
 const { makeVidResourcesArray, makeMaliciousVidResource } = require('./vid-resources.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 
-describe.only('Video Resources Endpoints', function() {
+describe('Video Resources Endpoints', function() {
   let db;
 
   before('make knex instance', () => {

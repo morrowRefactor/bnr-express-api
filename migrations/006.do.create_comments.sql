@@ -4,6 +4,6 @@ CREATE TABLE comments (
     date_posted TIMESTAMPTZ NOT NULL,
     uid INTEGER
         REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    vid INTEGER
+    vid_id INTEGER
         REFERENCES videos(id) ON DELETE CASCADE NOT NULL
 );
