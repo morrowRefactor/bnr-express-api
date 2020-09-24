@@ -25,28 +25,34 @@ vidTagsRouter
   .post(jsonParser, (req, res, next) => {
     const { vid_id, tags } = req.body;
     const newVidTag = { vid_id, tags };
+    let tagcount = 0;
 
     for (const [key, value] of Object.entries(newVidTag))
       if (value == null)
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         });
+      
       newVidTag.tags.forEach(tag => {
         const eachTag = {
           tag_id: tag,
           vid_id: newVidTag.vid_id
         };
 
-        const test = VidTagsService.insertVidTag(
+        VidTagsService.insertVidTag(
           req.app.get('db'),
           eachTag
         )
+        
+        tagcount++;
       })
-      
-      res
-        .status(201)
-        .location(path.posix.join(req.originalUrl, `/${newVidTag.tags[0]}`))
-        .json(newVidTag)
+
+      if(tagcount === newVidTag.tags.length) {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${newVidTag.tags[0]}`))
+          .json(newVidTag)
+      }
   });
 
 vidTagsRouter
