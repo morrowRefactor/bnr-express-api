@@ -23,25 +23,30 @@ vidTagsRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { vid_id, tag_id } = req.body;
-    const newVidTag = { vid_id, tag_id };
+    const { vid_id, tags } = req.body;
+    const newVidTag = { vid_id, tags };
 
     for (const [key, value] of Object.entries(newVidTag))
       if (value == null)
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         });
-    VidTagsService.insertVidTag(
-      req.app.get('db'),
-      newVidTag
-    )
-      .then(vidtag => {
-        res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${vidtag.id}`))
-          .json(serializeVidTags(vidtag))
+      newVidTag.tags.forEach(tag => {
+        const eachTag = {
+          tag_id: tag,
+          vid_id: newVidTag.vid_id
+        };
+
+        const test = VidTagsService.insertVidTag(
+          req.app.get('db'),
+          eachTag
+        )
       })
-      .catch(next)
+      
+      res
+        .status(201)
+        .location(path.posix.join(req.originalUrl, `/${newVidTag.tags[0]}`))
+        .json(newVidTag)
   });
 
 vidTagsRouter

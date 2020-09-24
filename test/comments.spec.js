@@ -4,7 +4,7 @@ const { makeCommentsArray, makeMaliciousComment } = require('./comments.fixtures
 const { makeVideosArray } = require('./videos.fixtures');
 const { makeUsersArray } = require('./users.fixtures');
 
-describe.only('Comments Endpoints', function() {
+describe('Comments Endpoints', function() {
   let db;
 
   before('make knex instance', () => {

@@ -120,7 +120,7 @@ describe('Video Tags Endpoints', function() {
     it(`creates a video tag, responding with 201 and the new video tag`, () => {
       const newVideoTag = {
         vid_id: 2,
-        tag_id: 1
+        tags: [ 1, 2, 3 ]
       };
 
       return supertest(app)
@@ -128,24 +128,18 @@ describe('Video Tags Endpoints', function() {
         .send(newVideoTag)
         .expect(201)
         .expect(res => {
-          expect(res.body.vid_id).to.eql(newVideoTag.vid_id)
-          expect(res.body.tag_id).to.eql(newVideoTag.tag_id)
-          expect(res.body).to.have.property('id')
-          expect(res.headers.location).to.eql(`/api/vid-tags/${res.body.id}`)
+          expect(res.body.tags).to.eql(newVideoTag.tags)
+          expect(res.body).to.have.property('vid_id')
+          expect(res.headers.location).to.eql(`/api/vid-tags/${newVideoTag.tags[0]}`)
         })
-        .then(res =>
-          supertest(app)
-            .get(`/api/vid-tags/${res.body.id}`)
-            .expect(res.body)
-        )
     });
 
-    const requiredFields = [ 'vid_id', 'tag_id' ];
+    const requiredFields = [ 'vid_id', 'tags' ];
 
     requiredFields.forEach(field => {
         const newVideoTag = {
             vid_id: 2,
-            tag_id: 1
+            tags: [ 1, 2 ]
           };
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
