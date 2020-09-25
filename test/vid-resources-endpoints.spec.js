@@ -3,7 +3,7 @@ const app = require('../src/app');
 const { makeVidResourcesArray, makeMaliciousVidResource } = require('./vid-resources.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 
-describe.only('Video Resources Endpoints', function() {
+describe('Video Resources Endpoints', function() {
   let db;
 
   before('make knex instance', () => {
@@ -145,47 +145,49 @@ describe.only('Video Resources Endpoints', function() {
   describe(`POST /api/vid-resources`, () => {
     const testVideos = makeVideosArray();
 
-    beforeEach('insert route types, locations, and routes', () => {
+    beforeEach('insert videos', () => {
       return db
         .into('videos')
         .insert(testVideos)
     });
 
     it(`creates a video resource, responding with 201 and the new video resource`, () => {
-      const newVidResource = {
-        description: 'Test new description',
-        link: 'http://www.somesite.com',
-        vid_id: 1
-      };
+      const newVidResource = [
+        {
+          description: 'Test new description',
+          link: 'http://www.somesite.com',
+          vid_id: 1
+        },
+        {
+          description: 'Test new description',
+          link: 'http://www.somesite.com',
+          vid_id: 1
+        },
+      ];
+
       return supertest(app)
         .post('/api/vid-resources')
         .send(newVidResource)
         .expect(201)
         .expect(res => {
-          expect(res.body.description).to.eql(newVidResource.description)
-          expect(res.body.link).to.eql(newVidResource.link)
-          expect(res.body.vid_id).to.eql(newVidResource.vid_id)
-          expect(res.body).to.have.property('id')
-          expect(res.headers.location).to.eql(`/api/vid-resources/${res.body.id}`)
+          expect(res.body.description).to.eql(newVidResource[0].description)
+          expect(res.body.link).to.eql(newVidResource[0].link)
+          expect(res.body.vid_id).to.eql(newVidResource[0].vid_id)
+          expect(res.headers.location).to.eql(`/api/vid-resources/${newVidResource[0].vid_id}`)
         })
-        .then(res =>
-          supertest(app)
-            .get(`/api/vid-resources/${res.body.id}`)
-            .expect(res.body)
-        )
     });
 
     const requiredFields = ['description', 'link', 'vid_id'];
 
     requiredFields.forEach(field => {
-        const newVidResource = {
+        const newVidResource = [{
             description: 'Test new description',
             link: 'http://www.somesite.com',
             vid_id: 1
-        };
+        }];
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-        delete newVidResource[field]
+        delete newVidResource[0][field]
 
         return supertest(app)
           .post('/api/vid-resources')
@@ -203,9 +205,9 @@ describe.only('Video Resources Endpoints', function() {
         .send(maliciousVidResource)
         .expect(201)
         .expect(res => {
-            expect(res.body.description).to.eql(expectedVidResource.description)
-            expect(res.body.link).to.eql(expectedVidResource.link)
-            expect(res.body.vid_id).to.eql(expectedVidResource.vid_id)
+            expect(res.body.description).to.eql(expectedVidResource[0].description)
+            expect(res.body.link).to.eql(expectedVidResource[0].link)
+            expect(res.body.vid_id).to.eql(expectedVidResource[0].vid_id)
         })
     });
   });

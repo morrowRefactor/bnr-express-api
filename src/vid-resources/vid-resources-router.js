@@ -24,27 +24,43 @@ vidResourcesRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { description, link, vid_id } = req.body;
-    const newVidResource = { description, link, vid_id };
+    const newVidResources = req.body;
+    
+    newVidResources.forEach(vidRes => {
+      const { description, link, vid_id } = vidRes;
+      const newVidRes = { description, link, vid_id };
 
-    for (const [key, value] of Object.entries(newVidResource))
-      if (value == null)
-        return res.status(400).json({
-          error: { message: `Missing '${key}' in request body` }
-        });
-    VidResourcesService.insertVidResource(
-      req.app.get('db'),
-      newVidResource
-    )
-      .then(vid => {
-        res
+      for (const [key, value] of Object.entries(newVidRes))
+        if (value == null)
+          return res.status(400).json({
+            error: { message: `Missing '${key}' in request body` }
+          });
+    })
+    
+    let resCount = 0;
+    newVidResources.forEach(res => {
+      const eachVidRes = {
+        vid_id: res.vid_id,
+        description: res.description,
+        link: res.link
+      };
+
+      VidResourcesService.insertVidResource(
+        req.app.get('db'),
+        eachVidRes
+      )
+
+      resCount++;
+    })
+    
+    if(resCount === newVidResources.length) {
+      res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${vid.id}`))
-          .json(serializeVidResources(vid));
-      })
-      .catch(next)
+          .location(path.posix.join(req.originalUrl, `/${newVidResources[0].vid_id}`))
+          .json(serializeVidResources(newVidResources[0]));
+    }
   });
-
+  
 vidResourcesRouter
   .route('/:vid_id')
   .all((req, res, next) => {

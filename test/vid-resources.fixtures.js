@@ -82,18 +82,18 @@ function makeVidResourcesArray() {
 };
 
 function makeMaliciousVidResource() {
-    const maliciousVidResource = {
+    const maliciousVidResource = [{
         id: 911,
         description: 'Naughty naughty very naughty <script>alert("xss");</script>',
         link: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
         vid_id: 2
-    };
-    const expectedVidResource = {
+    }];
+    const expectedVidResource = [{
         ...maliciousVidResource,
         description: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
         link: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
         vid_id: 2
-    };
+    }];
     return {
         maliciousVidResource,
         expectedVidResource
