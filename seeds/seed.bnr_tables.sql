@@ -25,16 +25,16 @@ INSERT INTO tags (tag)
     ('History')
 ;
 
-INSERT INTO videos (title, date_posted, description, embed_code)
+INSERT INTO videos (title, date_posted, description, embed_code, image)
   VALUES
-    ('Political Video 1', '2020-08-25', 'A video discussing politcal issues.', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Political Video 2', '2020-07-12', 'A video discussing politcal issues and economics.', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Political Video 3', '2020-04-23', 'A video discussing politcal issues and history.', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Historical Video 1', '2020-09-02', 'A video discussing interesting historical stuff', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Historical Video 2', '2020-05-08', 'A video discussing interesting historical stuff and economic stuff', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Economics Video 1', '2020-06-02', 'A video discussing matters of economics', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Economics Video 2', '2020-02-22', 'A video discussing matters of economics and politics and history', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-    ('Economics Video 3', '2020-03-27', 'A video discussing matters of economics and politics', '<iframe src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+    ('Political Video 1', '2020-08-25', 'A video discussing politcal issues.', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Political Video 2', '2020-07-12', 'A video discussing politcal issues and economics.', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Political Video 3', '2020-04-23', 'A video discussing politcal issues and history.', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Historical Video 1', '2020-09-02', 'A video discussing interesting historical stuff', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Historical Video 2', '2020-05-08', 'A video discussing interesting historical stuff and economic stuff', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Economics Video 1', '2020-06-02', 'A video discussing matters of economics', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Economics Video 2', '2020-02-22', 'A video discussing matters of economics and politics and history', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg'),
+    ('Economics Video 3', '2020-03-27', 'A video discussing matters of economics and politics', 'https://www.youtube.com/embed/cywyb3Y6Qxg', 'https://img.youtube.com/vi/cywyb3Y6Qxg/hqdefault.jpg')
 ;
 
 INSERT INTO vid_tags (vid_id, tag_id)
