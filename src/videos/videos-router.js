@@ -10,7 +10,7 @@ const serializeVideos = vid => ({
   id: vid.id,
   title: xss(vid.title),
   description: xss(vid.description),
-  embed_code: vid.embed_code,
+  youtube_id: xss(vid.youtube_id),
   date_posted: new Date(vid.date_posted).toISOString('en', { timeZone: 'UTC' })
 });
 
@@ -25,8 +25,8 @@ videosRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { title, description, embed_code, date_posted } = req.body;
-    const newVideo = { title, description, embed_code, date_posted };
+    const { title, description, youtube_id, date_posted } = req.body;
+    const newVideo = { title, description, youtube_id, date_posted };
 
     for (const [key, value] of Object.entries(newVideo))
       if (value == null)
@@ -78,14 +78,14 @@ videosRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, description, embed_code, date_posted } = req.body;
-    const videoToUpdate = { title, description, embed_code, date_posted };
+    const { title, description, youtube_id, date_posted } = req.body;
+    const videoToUpdate = { title, description, youtube_id, date_posted };
 
     const numberOfValues = Object.values(videoToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
         return res.status(400).json({
         error: {
-          message: `Request body must contain a title, description and embed code`
+          message: `Request body must contain a title, description and YouTube ID`
         }
       });
     };

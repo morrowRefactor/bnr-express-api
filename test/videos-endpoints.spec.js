@@ -63,7 +63,7 @@ describe('Videos Endpoints', function() {
           .expect(res => {
             expect(res.body[0].title).to.eql(expectedVideo.title)
             expect(res.body[0].description).to.eql(expectedVideo.description)
-            expect(res.body[0].embed_code).to.eql(expectedVideo.embed_code)
+            expect(res.body[0].youtube_id).to.eql(expectedVideo.youtube_id)
             expect(res.body[0].date_posted).to.eql(expectedVideo.date_posted)
           })
       });
@@ -114,7 +114,7 @@ describe('Videos Endpoints', function() {
           .expect(res => {
             expect(res.body.title).to.eql(expectedVideo.title)
             expect(res.body.description).to.eql(expectedVideo.description)
-            expect(res.body.embed_code).to.eql(expectedVideo.embed_code)
+            expect(res.body.youtube_id).to.eql(expectedVideo.youtube_id)
             expect(res.body.date_posted).to.eql(expectedVideo.date_posted)
           })
       });
@@ -127,7 +127,7 @@ describe('Videos Endpoints', function() {
       const newVideo = {
         title: 'test video',
         description: 'test description',
-        embed_code: '<iframe width="560" height="315" src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+        youtube_id: 'cywyb3Y6Qxg',
         date_posted: new Date('2020-03-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
       };
 
@@ -138,7 +138,7 @@ describe('Videos Endpoints', function() {
         .expect(res => {
           expect(res.body.title).to.eql(newVideo.title)
           expect(res.body.description).to.eql(newVideo.description)
-          expect(res.body.embed_code).to.eql(newVideo.embed_code)
+          expect(res.body.youtube_id).to.eql(newVideo.youtube_id)
           expect(res.body.date_posted).to.eql(newVideo.date_posted)
           expect(res.body).to.have.property('id')
           expect(res.headers.location).to.eql(`/api/videos/${res.body.id}`)
@@ -150,13 +150,13 @@ describe('Videos Endpoints', function() {
         )
     });
 
-    const requiredFields = ['title', 'description', 'embed_code', 'date_posted'];
+    const requiredFields = ['title', 'description', 'youtube_id', 'date_posted'];
 
     requiredFields.forEach(field => {
         const newVideo = {
             title: 'test video',
             description: 'test description',
-            embed_code: '<iframe width="560" height="315" src="https://www.youtube.com/embed/cywyb3Y6Qxg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+            youtube_id: 'cywyb3Y6Qxg',
             date_posted: new Date('2020-03-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         };
 
@@ -181,7 +181,7 @@ describe('Videos Endpoints', function() {
         .expect(res => {
             expect(res.body.title).to.eql(expectedVideo.title)
             expect(res.body.description).to.eql(expectedVideo.description)
-            expect(res.body.embed_code).to.eql(expectedVideo.embed_code)
+            expect(res.body.youtube_id).to.eql(expectedVideo.youtube_id)
             expect(res.body.date_posted).to.eql(expectedVideo.date_posted)
         })
     });
@@ -268,7 +268,7 @@ describe('Videos Endpoints', function() {
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
-              message: `Request body must contain a title, description and embed code`
+              message: `Request body must contain a title, description and YouTube ID`
             }
           })
       });

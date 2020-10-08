@@ -3,6 +3,5 @@ CREATE TABLE videos (
     title TEXT NOT NULL,
     date_posted TIMESTAMPTZ DEFAULT now() NOT NULL,
     description TEXT NOT NULL,
-    embed_code TEXT NOT NULL,
-    image TEXT NOT NULL
+    youtube_id TEXT NOT NULL
 );
