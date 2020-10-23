@@ -26,7 +26,6 @@ commentsRouter
       .catch(next)
   })
   .post(requireAuth, jsonParser, (req, res, next) => {
-    const bearerToken = req.headers.getBearerToken();
     const { comment, uid, vid_id, date_posted } = req.body;
     const newComment = { comment, uid, vid_id, date_posted };
 

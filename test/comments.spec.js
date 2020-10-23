@@ -174,6 +174,11 @@ describe('Comments Endpoints', function() {
     const testVideos = makeVideosArray();
     const testUsers = makeUsersArray();
 
+    function makeAuthHeader(user) {
+      const token = Buffer.from(`${user.name}:${user.password}`).toString('base64')
+      return `Basic ${token}`
+    }
+
     beforeEach('insert videos and users', () => {
       return db
         .into('videos')
@@ -185,6 +190,22 @@ describe('Comments Endpoints', function() {
           })
     });
 
+    it(`responds 401 'Unauthorized request' when invalid user`, () => {
+      const userInvalidPass = { name: 'wronguser', password: 'wrong' };
+      return supertest(app)
+        .post('/api/comments')
+        .set('Authorization', makeAuthHeader(userInvalidPass))
+        .expect(401, { error: `Unauthorized request` })
+    });
+    
+    it(`responds 401 'Unauthorized request' when invalid password`, () => {
+      const userInvalidPass = { name: testUsers[0].name, password: 'wrong' };
+      return supertest(app)
+        .post('/api/comments')
+        .set('Authorization', makeAuthHeader(userInvalidPass))
+        .expect(401, { error: `Unauthorized request` })
+    });
+
     it(`creates a comment, responding with 201 and the new comment`, () => {
       const newComment = {
         comment: 'Test new comment',
@@ -194,6 +215,7 @@ describe('Comments Endpoints', function() {
       };
       return supertest(app)
         .post('/api/comments')
+        .set('Authorization', makeAuthHeader(testUsers[0]))
         .send(newComment)
         .expect(201)
         .expect(res => {
@@ -209,7 +231,7 @@ describe('Comments Endpoints', function() {
             .expect(res.body)
         )
     });
-
+    
     const requiredFields = ['comment', 'uid', 'vid_id', 'date_posted'];
 
     requiredFields.forEach(field => {
@@ -225,6 +247,7 @@ describe('Comments Endpoints', function() {
 
         return supertest(app)
           .post('/api/comments')
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .send(newComment)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -236,6 +259,7 @@ describe('Comments Endpoints', function() {
       const { maliciousComment, expectedComment } = makeMaliciousComment();
       return supertest(app)
         .post(`/api/comments`)
+        .set('Authorization', makeAuthHeader(testUsers[0]))
         .send(maliciousComment)
         .expect(201)
         .expect(res => {

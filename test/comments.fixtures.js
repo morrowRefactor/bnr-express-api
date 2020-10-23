@@ -1,3 +1,6 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 function makeCommentsArray() {
     return [
         {
@@ -129,7 +132,16 @@ function makeMaliciousComment() {
     };
 };
 
+function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+    const token = jwt.sign({ user_id: user.id }, secret, {
+      subject: user.name,
+      algorithm: 'HS256',
+    })
+    return `Bearer ${token}`
+;}
+
 module.exports = {
     makeCommentsArray,
-    makeMaliciousComment
+    makeMaliciousComment,
+    makeAuthHeader
 };
