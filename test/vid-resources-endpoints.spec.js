@@ -1,5 +1,6 @@
 const knex = require('knex');
 const app = require('../src/app');
+const { expect } = require('chai');
 const { makeVidResourcesArray, makeMaliciousVidResource } = require('./vid-resources.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 

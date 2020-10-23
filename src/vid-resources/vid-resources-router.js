@@ -37,28 +37,29 @@ vidResourcesRouter
           });
     })
     
-    let resCount = 0;
-    newVidResources.forEach(res => {
-      const eachVidRes = {
-        vid_id: res.vid_id,
-        description: res.description,
-        link: res.link
-      };
+    const promise = new Promise(() => {
+      newVidResources.forEach(res => {
+        const eachVidRes = {
+          vid_id: res.vid_id,
+          description: res.description,
+          link: res.link
+        };
+  
+        VidResourcesService.insertVidResource(
+          req.app.get('db'),
+          eachVidRes
+        )
+      })
 
-      VidResourcesService.insertVidResource(
-        req.app.get('db'),
-        eachVidRes
-      )
-
-      resCount++;
-    })
+      return;
+    });
     
-    if(resCount === newVidResources.length) {
+    promise.then(() => {
       res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${newVidResources[0].vid_id}`))
-          .json(serializeVidResources(newVidResources[0]));
-    }
+          .status(201).send()
+          /*.location(path.posix.join(req.originalUrl, `/${newVidResources[0].vid_id}`))
+          .json(serializeVidResources(newVidResources[0]));*/
+    })
   });
   
 vidResourcesRouter

@@ -2,6 +2,7 @@ const express = require('express');
 const xss = require('xss');
 const path = require('path');
 const CommentsService = require('./comments-service');
+const { requireAuth } = require('../middleware/basic-auth');
 
 const commentsRouter = express.Router();
 const jsonParser = express.json();
@@ -24,7 +25,8 @@ commentsRouter
       })
       .catch(next)
   })
-  .post(jsonParser, (req, res, next) => {
+  .post(requireAuth, jsonParser, (req, res, next) => {
+    const bearerToken = req.headers.getBearerToken();
     const { comment, uid, vid_id, date_posted } = req.body;
     const newComment = { comment, uid, vid_id, date_posted };
 
