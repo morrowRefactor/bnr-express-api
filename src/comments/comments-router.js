@@ -26,14 +26,18 @@ commentsRouter
       .catch(next)
   })
   .post(requireAuth, jsonParser, (req, res, next) => {
-    const { comment, uid, vid_id, date_posted } = req.body;
-    const newComment = { comment, uid, vid_id, date_posted };
+    const { comment, vid_id, date_posted } = req.body;
+    const newComment = { comment, vid_id, date_posted };
 
     for (const [key, value] of Object.entries(newComment))
       if (value == null)
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
-        });
+    });
+
+    newComment.uid = req.user.id;
+    console.log('newcomment', newComment)
+
     CommentsService.insertComment(
       req.app.get('db'),
       newComment

@@ -189,7 +189,7 @@ describe('Comments Endpoints', function() {
               .insert(testUsers)
           })
     });
-
+    
     it(`responds 401 'Unauthorized request' when invalid user`, () => {
       const userInvalidPass = { name: 'wronguser', password: 'wrong' };
       return supertest(app)
@@ -205,11 +205,10 @@ describe('Comments Endpoints', function() {
         .set('Authorization', makeAuthHeader(userInvalidPass))
         .expect(401, { error: `Unauthorized request` })
     });
-
+    
     it(`creates a comment, responding with 201 and the new comment`, () => {
       const newComment = {
         comment: 'Test new comment',
-        uid: 2,
         vid_id: 1,
         date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
       };
@@ -220,7 +219,7 @@ describe('Comments Endpoints', function() {
         .expect(201)
         .expect(res => {
           expect(res.body.comment).to.eql(newComment.comment)
-          expect(res.body.uid).to.eql(newComment.uid)
+          expect(res.body.uid).to.eql(testUsers[0].id)
           expect(res.body.vid_id).to.eql(newComment.vid_id)
           expect(res.body).to.have.property('id')
           expect(res.headers.location).to.eql(`/api/comments/${res.body.id}`)
@@ -232,12 +231,11 @@ describe('Comments Endpoints', function() {
         )
     });
     
-    const requiredFields = ['comment', 'uid', 'vid_id', 'date_posted'];
+    const requiredFields = ['comment', 'vid_id', 'date_posted'];
 
     requiredFields.forEach(field => {
         const newComment = {
             comment: 'Test new comment',
-            uid: 2,
             vid_id: 1,
             date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
           };
@@ -256,6 +254,7 @@ describe('Comments Endpoints', function() {
     });
 
     it('removes XSS attack content from response', () => {
+      const testUsers = makeUsersArray();
       const { maliciousComment, expectedComment } = makeMaliciousComment();
       return supertest(app)
         .post(`/api/comments`)
@@ -264,7 +263,7 @@ describe('Comments Endpoints', function() {
         .expect(201)
         .expect(res => {
             expect(res.body.comment).to.eql(expectedComment.comment)
-            expect(res.body.uid).to.eql(expectedComment.uid)
+            expect(res.body.uid).to.eql(testUsers[0].id)
             expect(res.body.vid_id).to.eql(expectedComment.vid_id)
         })
     });
