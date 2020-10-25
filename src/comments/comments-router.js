@@ -36,7 +36,6 @@ commentsRouter
     });
 
     newComment.uid = req.user.id;
-    console.log('newcomment', newComment)
 
     CommentsService.insertComment(
       req.app.get('db'),

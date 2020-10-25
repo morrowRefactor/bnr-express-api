@@ -3,6 +3,7 @@ const app = require('../src/app');
 const { makeCommentsArray, makeMaliciousComment } = require('./comments.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 const { makeUsersArray } = require('./users.fixtures');
+const helpers = require('./test-helpers');
 
 describe('Comments Endpoints', function() {
   let db;
@@ -43,7 +44,7 @@ describe('Comments Endpoints', function() {
           .insert(testVideos)
           .then(() => {
             return db
-              .into('users')
+              .into(users)
               .insert(testUsers)
           })
           .then(() => {
@@ -184,10 +185,8 @@ describe('Comments Endpoints', function() {
         .into('videos')
         .insert(testVideos)
         .then(() => {
-            return db
-              .into('users')
-              .insert(testUsers)
-          })
+            helpers.seedUsers(db, testUsers)
+        })
     });
     
     it(`responds 401 'Unauthorized request' when invalid user`, () => {
