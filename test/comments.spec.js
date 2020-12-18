@@ -211,6 +211,7 @@ describe('Comments Endpoints', function() {
         vid_id: 1,
         date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
       };
+      
       return supertest(app)
         .post('/api/comments')
         .set('Authorization', makeAuthHeader(testUsers[0]))

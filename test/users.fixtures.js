@@ -1,27 +1,29 @@
+const bcrypt = require('bcryptjs');
+
 function makeUsersArray() {
     return [
         {
             id: 1,
             name: 'John Doe',
-            password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
+            password: 'password',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 2,
             name: 'Jane Doe',
-            password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
+            password: 'password',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 3,
             name: 'Joe Thornton',
-            password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
+            password: 'password',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 4,
             name: 'Brent Burns',
-            password: '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu',
+            password: 'password',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         }
     ];
@@ -44,7 +46,23 @@ function makeMaliciousUser() {
     };
 };
 
+function seedUsers(db, users) {
+    const preppedUsers = users.map(user => ({
+      ...user,
+      password: bcrypt.hashSync(user.password, 1)
+    }))
+    return db.into('users').insert(preppedUsers)
+      .then(() =>
+        // update the auto sequence to stay in sync
+        db.raw(
+          `SELECT setval('users_id_seq', ?)`,
+          [users[users.length - 1].id],
+        )
+      )
+};
+
 module.exports = {
     makeUsersArray,
-    makeMaliciousUser
+    makeMaliciousUser,
+    seedUsers
 };

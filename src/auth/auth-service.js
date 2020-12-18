@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken')
 const config = require('../config')
 
 const AuthService = {
-  getUserWithUserName(db, name) {
+  getUserWithUserEmail(db, email) {
     return db('users')
-      .where({ name })
+      .where({ email })
       .first()
   },
   comparePasswords(password, hash) {
@@ -14,8 +14,7 @@ const AuthService = {
   createJwt(subject, payload) {
     return jwt.sign(payload, config.JWT_SECRET, {
       subject,
-      expiresIn: config.JWT_EXPIRY,
-      algorithm: 'HS256',
+      algorithm: 'HS256'
     })
   },
   verifyJwt(token) {
