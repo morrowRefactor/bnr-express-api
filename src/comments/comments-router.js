@@ -2,7 +2,7 @@ const express = require('express');
 const xss = require('xss');
 const path = require('path');
 const CommentsService = require('./comments-service');
-const { requireAuth } = require('../middleware/basic-auth');
+const { requireAuth } = require('../middleware/jwt-auth');
 
 const commentsRouter = express.Router();
 const jsonParser = express.json();
@@ -26,16 +26,14 @@ commentsRouter
       .catch(next)
   })
   .post(requireAuth, jsonParser, (req, res, next) => {
-    const { comment, vid_id, date_posted } = req.body;
-    const newComment = { comment, vid_id, date_posted };
-
+    const { uid, comment, vid_id, date_posted } = req.body;
+    const newComment = { uid, comment, vid_id, date_posted };
+    
     for (const [key, value] of Object.entries(newComment))
       if (value == null)
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
     });
-
-    newComment.uid = req.user.id;
 
     CommentsService.insertComment(
       req.app.get('db'),

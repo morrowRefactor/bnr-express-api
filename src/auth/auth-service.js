@@ -27,7 +27,7 @@ const AuthService = {
       .from(token, 'base64')
       .toString()
       .split(':')
-  },
-}
+  }
+};
 
 module.exports = AuthService

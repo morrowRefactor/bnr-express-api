@@ -12,6 +12,7 @@ TRUNCATE
 
 INSERT INTO users (name, email, password)
   VALUES
+    ('Some Guy', 'testemail@gmail.com', '$2a$12$bwuDYT.gFDDKyZEEfateXOu91kHw7PkEh1Io0e1LPobTaD0rhxXgK'),
     ('John Doe', 'someemail@gmail.com', '$2a$12$tLaw6.LCTFPhPOok06s7Eu2vRJ/ocUdO86cyqnEpPaBp2XXpvKcWu'),
     ('Jane Doe', 'someemail@gmail.com', '$2a$12$cR/rZfYOHfQNrdrYfQVSRu1VDDq/uT511KwEaQupZtvATFJKS4M3G'),
     ('Joe Thornton', 'someemail@gmail.com', '$2a$12$0T1b6teoGy1sfCZkMHf70.rEp/6su.08ly2PeRq7M30EhnRFugvcq'),
