@@ -11,6 +11,7 @@ const vidTagsRouter = require('./vid-tags/vid-tags-router');
 const vidResourcesRouter = require('./vid-resources/vid-resources-router');
 const commentsRouter = require('./comments/comments-router');
 const authRouter = require('./auth/auth-router');
+const resetPasswordRouter = require('./reset-password/reset-password-router');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/vid-tags', vidTagsRouter);
 app.use('/api/vid-resources', vidResourcesRouter);
 app.use('/api/comments', commentsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/reset-password', resetPasswordRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')

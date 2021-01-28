@@ -3,6 +3,7 @@ const xss = require('xss');
 const path = require('path');
 const UsersService = require('./users-service');
 const AuthService = require('../auth/auth-service');
+const { requireAuth } = require('../middleware/jwt-auth');
 
 const usersRouter = express.Router();
 const jsonParser = express.json();
@@ -103,7 +104,7 @@ usersRouter
   .get((req, res, next) => {
     res.json(serializeUsers(res.user))
   })
-  .delete((req, res, next) => {
+  .delete(requireAuth, (req, res, next) => {
     UsersService.deleteUser(
       req.app.get('db'),
       req.params.user_id
@@ -113,9 +114,9 @@ usersRouter
       })
       .catch(next)
   })
-  .patch(jsonParser, (req, res, next) => {
-    const { name, password } = req.body;
-    const userToUpdate = { name, password };
+  .patch(requireAuth, jsonParser, (req, res, next) => {
+    const { id, name, email, password } = req.body;
+    const userToUpdate = { id, name, email, password };
 
     const numberOfValues = Object.values(userToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
@@ -126,15 +127,25 @@ usersRouter
       });
     };
 
-    UsersService.updateUser(
-        req.app.get('db'),
-        req.params.user_id,
-        userToUpdate
-      )
-      .then(numRowsAffected => {
-        res.status(204).end()
-      })
-      .catch(next)
+    return UsersService.hashPassword(password)
+    .then(hashedPassword => {
+        const updatedUser = {
+          id: userToUpdate.id,
+          name: userToUpdate.name,
+          email: userToUpdate.email,
+          password: hashedPassword
+        };
+
+        UsersService.updateUser(
+          req.app.get('db'),
+          req.params.user_id,
+          updatedUser
+        )
+        .then(numRowsAffected => {
+          res.status(204).end()
+        })
+        .catch(next)
+    })
   });
 
 module.exports = usersRouter;
