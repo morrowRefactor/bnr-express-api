@@ -12,7 +12,7 @@ const serializeUsers = u => ({
   id: u.id,
   name: xss(u.name),
   email: xss(u.email),
-  password: xss(u.password),
+  about: xss(u.about),
   joined_date: new Date(u.joined_date).toISOString('en', { timeZone: 'UTC' })
 });
 
@@ -20,6 +20,7 @@ const serializeNewUser = u => ({
   id: u.id,
   name: xss(u.name),
   email: xss(u.email),
+  about: xss(u.about),
   joined_date: new Date(u.joined_date).toISOString('en', { timeZone: 'UTC' }),
   authToken: u.authToken
 });
@@ -115,37 +116,60 @@ usersRouter
       .catch(next)
   })
   .patch(requireAuth, jsonParser, (req, res, next) => {
-    const { id, name, email, password } = req.body;
-    const userToUpdate = { id, name, email, password };
+    const { id, name, about, email, password } = req.body;
+    const userToUpdate = { id, name, about, email, password };
 
-    const numberOfValues = Object.values(userToUpdate).filter(Boolean).length;
-    if (numberOfValues === 0) {
-        return res.status(400).json({
-        error: {
-          message: `Request body must contain a name and password`
-        }
-      });
-    };
+    
+    if(userToUpdate.password) {
+      const reqFields = { id, email, password };
+      const numberOfValues = Object.values(reqFields).filter(Boolean).length;
+      if (numberOfValues === 0) {
+          return res.status(400).json({
+          error: {
+            message: `Request body must contain an id, email, and password`
+          }
+        });
+      };
 
-    return UsersService.hashPassword(password)
-    .then(hashedPassword => {
-        const updatedUser = {
-          id: userToUpdate.id,
-          name: userToUpdate.name,
-          email: userToUpdate.email,
-          password: hashedPassword
-        };
+      return UsersService.hashPassword(password)
+        .then(hashedPassword => {
+            const updatedUser = {
+              id: userToUpdate.id,
+              name: userToUpdate.name,
+              email: userToUpdate.email,
+              password: hashedPassword
+            };
 
-        UsersService.updateUser(
-          req.app.get('db'),
-          req.params.user_id,
-          updatedUser
-        )
-        .then(numRowsAffected => {
-          res.status(204).end()
+            UsersService.updateUser(
+              req.app.get('db'),
+              req.params.user_id,
+              updatedUser
+            )
+            .then(numRowsAffected => {
+              res.status(204).end()
+            })
+            .catch(next)
         })
-        .catch(next)
-    })
+    }
+    else {
+      if (!userToUpdate.id) {
+          return res.status(400).json({
+          error: {
+            message: `Request body must contain an id`
+          }
+        });
+      };
+
+      UsersService.updateUser(
+        req.app.get('db'),
+        req.params.user_id,
+        userToUpdate
+      )
+      .then(numRowsAffected => {
+        res.status(204).end()
+      })
+      .catch(next)
+    }
   });
 
 module.exports = usersRouter;
