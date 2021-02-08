@@ -4,6 +4,7 @@ const path = require('path');
 const ResetPasswordService = require('./reset-password-service');
 const { requireAuth } = require('../middleware/jwt-auth');
 const SibApiV3Sdk = require('sib-api-v3-sdk');
+const config = require('../config');
 
 const resetPasswordRouter = express.Router();
 const jsonParser = express.json();
@@ -32,7 +33,7 @@ resetPasswordRouter
       const firstName = user.name.split(" ");
       let defaultClient = SibApiV3Sdk.ApiClient.instance;
       let apiKey = defaultClient.authentications['api-key'];
-      apiKey.apiKey = 'API_KEY';
+      apiKey.apiKey = config.EMAIL_API_KEY;
       let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
       let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
       
