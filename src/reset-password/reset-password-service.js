@@ -16,6 +16,9 @@ const ResetPasswordService = {
     getById(knex, id) {
        return knex.from('temp_passwords').select('*').where('id', id).first()
     },
+    getUserById(knex, id) {
+        return knex.from('users').select('*').where('id', id).first()
+    },
     deleteTempPass(knex, id) {
         return knex('temp_passwords')
             .where({ id })

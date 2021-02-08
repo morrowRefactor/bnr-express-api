@@ -3,6 +3,7 @@ const xss = require('xss');
 const path = require('path');
 const ResetPasswordService = require('./reset-password-service');
 const { requireAuth } = require('../middleware/jwt-auth');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
 const resetPasswordRouter = express.Router();
 const jsonParser = express.json();
@@ -25,6 +26,30 @@ resetPasswordRouter
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         });
+
+    // send  reset email
+    ResetPasswordService.getUserById(req.app.get('db'), uid).then(user => {
+      const firstName = user.name.split(" ");
+      let defaultClient = SibApiV3Sdk.ApiClient.instance;
+      let apiKey = defaultClient.authentications['api-key'];
+      apiKey.apiKey = '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';
+      let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+      let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+      
+      sendSmtpEmail.subject = "Your temporary password";
+      sendSmtpEmail.htmlContent = `<html><body><p>Hi ${firstName[0]},</p><p>Here is the temporary password you requested: <strong>${password}</strong></p><p>If you did not request a password reset, please reply to this email with your concerns.</p><p>Beer and News Report</p></body></html>`;
+      sendSmtpEmail.sender = {"name":"Beer and News Report","email":"beerandnewsreport@gmail.com"};
+      sendSmtpEmail.to = [{"email": `${user.email}`,"name":`${user.name}`}];
+      sendSmtpEmail.replyTo = {"email":"beerandnewsreport@gmail.com","name":"Beer and News Report"};
+      sendSmtpEmail.headers = {"Password Reset":"unique-id-1234"};
+      
+      apiInstance.sendTransacEmail(sendSmtpEmail).then(function(data) {
+        console.log('API called successfully. Returned data: ' + JSON.stringify(data));
+      }, function(error) {
+        console.error(error);
+      });
+    })
+    
     
     return ResetPasswordService.hashPassword(password)
         .then(hashedPassword => {
