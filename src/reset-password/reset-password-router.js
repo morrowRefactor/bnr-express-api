@@ -32,7 +32,7 @@ resetPasswordRouter
       const firstName = user.name.split(" ");
       let defaultClient = SibApiV3Sdk.ApiClient.instance;
       let apiKey = defaultClient.authentications['api-key'];
-      apiKey.apiKey = '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';
+      apiKey.apiKey = 'API_KEY';
       let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
       let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
       
