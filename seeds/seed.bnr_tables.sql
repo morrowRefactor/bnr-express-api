@@ -28,6 +28,18 @@ INSERT INTO tags (tag)
 
 INSERT INTO videos (title, date_posted, description, youtube_id)
   VALUES
+    ('The GameStop Craze', '2021-02-04', 'In one week, GameStop stock went from $30 to over $300.  What made it go up so fast?  What was the driving force?  Are there other stocks doing this?  Well this show will tell why GameStop stock went up and where to look to find others.', 'ozlNMSYiD18'),
+    ('US Energy Program 1', '2021-01-28', 'What is the Green New Deal?  Are we headed for it?  Watch and see what the future holds.', '-kSw9jx3Oi8'),
+    ('No toothpaste and Zoom meeting 2', '2021-01-20', 'If 9 out of 10 dentist recommend using toothpaste, who was that one dentist who doesn''t?  Well I found him and did an interview.', 'xu6FP7lg63Q'),
+    ('Domestic Terrorist', '2021-01-14', 'Wow what happened at the capitol building?  How are we going to stop this?  This show explains how the Patriot Act will be a force against domestic terrorist.', 'xbR9bIRrrUw'),
+    ('The Covid Dilemma', '2021-01-06', 'Why is there some much distrust about the covid vaccine and our institutions?  How did it get this way?  I''ll try to answer these questions and give some information about the covid vaccine.', 'ZPQ2rNj8DLU'),
+    ('New Year''s Show 2021', '2021-01-01', 'Happy New Year everyone. Here are some highlights of my upcoming shows.', 'j6CRhz2zZ3A'),
+    ('BNR Happy Holidays', '2020-11-23', 'Year end highlights of my shows with Christmas music in the background', '9Uv1c_OqAAk'),
+    ('BNR Do this now!', '2020-11-09', 'Holidays are coming and your need to take precautions before someone hacks into your accounts.', 'jOFWEc0FH5Y'),
+    ('BNR Bad Zoom Meeting', '2020-11-02', '', 'OQl9HvAQjRg'),
+    ('BNR Thanksgiving dinner', '2020-10-26', 'Let the Lazy Man show you how to cook: Thanksgiving Dinner', 'Z49_WUlPVWM'),
+    ('BNR Lazy Man Cooking Show'), '2020-10-19', 'Here''s some cooking skits from a guy who can''t cook and doesn''t like to work.  Enjoy!', '87MRaT7QSuU'),
+    ('BNR Origins of Slavery', '2020-10-09', 'How did slavery start?  What caused it?  Check out this video and the surprising ending.', 'SOFjPNFIE-k'),
     ('The K shaped recovery', '2020-10-01', 'What is a K-shaped recovery?  Learn about it in this short video.', 'W37yx-dHysQ'),
     ('What are Options?', '2020-09-23', 'Have you ever wondered what options are in the stock market?  This is a brief introduction to what they are and how they are used.', 'W9gfQC54QE4'),
     ('Recession 2021', '2020-09-17', 'Everyone is talking about a coming recession.  Where should I out my money if a recession hits.  This video discussions the options.', 'VUiwe-ZaXaU'),
