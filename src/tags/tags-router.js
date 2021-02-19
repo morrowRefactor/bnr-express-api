@@ -1,6 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
+const { requireAuth } = require('../middleware/jwt-auth');
 const TagsService = require('./tags-service');
 
 const tagsRouter = express.Router();
@@ -21,26 +22,30 @@ tagsRouter
       })
       .catch(next)
   })
-  .post(jsonParser, (req, res, next) => {
-    const { tag } = req.body;
-    const newTag = { tag };
+  .post(requireAuth, jsonParser, (req, res, next) => {
+    const newTags = req.body;
+    let tagIds = [];
 
-    for (const [key, value] of Object.entries(newTag))
-      if (value == null)
-        return res.status(400).json({
-          error: { message: `Missing '${key}' in request body` }
-        });
-    TagsService.insertTag(
-      req.app.get('db'),
-      newTag
-    )
-      .then(tag => {
-        res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${tag.id}`))
-          .json(serializeTags(tag))
+    newTags.forEach(tag => {
+      const addTag = { tag: tag };
+      TagsService.insertTag(
+        req.app.get('db'),
+        addTag
+      )
+      .then(newTag => {
+        let newTagArr = tagIds;
+        newTagArr.push(newTag.id);
+        tagIds = newTagArr;
       })
-      .catch(next)
+      .then(e => {
+        if(tagIds.length === newTags.length) {
+          return res
+            .status(201)
+            .location(path.posix.join(req.originalUrl, `/${tagIds[0]}`))
+            .json(tagIds);
+        }
+      })
+    })
   });
 
 tagsRouter

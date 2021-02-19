@@ -38,7 +38,7 @@ INSERT INTO videos (title, date_posted, description, youtube_id)
     ('BNR Do this now!', '2020-11-09', 'Holidays are coming and your need to take precautions before someone hacks into your accounts.', 'jOFWEc0FH5Y'),
     ('BNR Bad Zoom Meeting', '2020-11-02', '', 'OQl9HvAQjRg'),
     ('BNR Thanksgiving dinner', '2020-10-26', 'Let the Lazy Man show you how to cook: Thanksgiving Dinner', 'Z49_WUlPVWM'),
-    ('BNR Lazy Man Cooking Show'), '2020-10-19', 'Here''s some cooking skits from a guy who can''t cook and doesn''t like to work.  Enjoy!', '87MRaT7QSuU'),
+    ('BNR Lazy Man Cooking Show', '2020-10-19', 'Here''s some cooking skits from a guy who can''t cook and doesn''t like to work.  Enjoy!', '87MRaT7QSuU'),
     ('BNR Origins of Slavery', '2020-10-09', 'How did slavery start?  What caused it?  Check out this video and the surprising ending.', 'SOFjPNFIE-k'),
     ('The K shaped recovery', '2020-10-01', 'What is a K-shaped recovery?  Learn about it in this short video.', 'W37yx-dHysQ'),
     ('What are Options?', '2020-09-23', 'Have you ever wondered what options are in the stock market?  This is a brief introduction to what they are and how they are used.', 'W9gfQC54QE4'),

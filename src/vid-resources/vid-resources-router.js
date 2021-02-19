@@ -1,6 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
+const { requireAuth } = require('../middleware/jwt-auth');
 const VidResourcesService = require('./vid-resources-service');
 
 const vidResourcesRouter = express.Router();
@@ -23,8 +24,9 @@ vidResourcesRouter
       })
       .catch(next)
   })
-  .post(jsonParser, (req, res, next) => {
+  .post(requireAuth, jsonParser, (req, res, next) => {
     const newVidResources = req.body;
+    let insertCount = 0;
     
     newVidResources.forEach(vidRes => {
       const { description, link, vid_id } = vidRes;
@@ -37,29 +39,26 @@ vidResourcesRouter
           });
     })
     
-    const promise = new Promise(() => {
-      newVidResources.forEach(res => {
-        const eachVidRes = {
-          vid_id: res.vid_id,
-          description: res.description,
-          link: res.link
-        };
-  
-        VidResourcesService.insertVidResource(
-          req.app.get('db'),
-          eachVidRes
-        )
-      })
+    newVidResources.forEach(res => {
+      const eachVidRes = {
+        vid_id: res.vid_id,
+        description: res.description,
+        link: res.link
+      };
 
-      return;
-    });
-    
-    promise.then(() => {
-      res
-          .status(201).send()
-          /*.location(path.posix.join(req.originalUrl, `/${newVidResources[0].vid_id}`))
-          .json(serializeVidResources(newVidResources[0]));*/
+      VidResourcesService.insertVidResource(
+        req.app.get('db'),
+        eachVidRes
+      );
+
+      insertCount++;
     })
+
+    if(insertCount === newVidResources.length) {
+      return res
+        .status(201)
+        .end()
+    }
   });
   
 vidResourcesRouter
