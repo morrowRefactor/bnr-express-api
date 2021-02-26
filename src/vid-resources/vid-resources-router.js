@@ -59,6 +59,26 @@ vidResourcesRouter
         .status(201)
         .end()
     }
+  })
+  .delete(requireAuth, jsonParser, (req, res, next) => {
+    const delResos = req.body;
+    let count = 0;
+
+    delResos.forEach(res => {
+      VidResourcesService.deleteVidResource(
+        req.app.get('db'),
+        res
+      )
+      .then(e => {
+        count++;
+      });
+    })
+
+    if(count === delResos.length) {
+      return res
+        .status(204)
+        .end()
+    }
   });
   
 vidResourcesRouter
@@ -81,16 +101,6 @@ vidResourcesRouter
   })
   .get((req, res, next) => {
     res.json(serializeVidResources(res.vid))
-  })
-  .delete((req, res, next) => {
-    VidResourcesService.deleteVidResource(
-      req.app.get('db'),
-      req.params.vid_id
-    )
-      .then(numRowsAffected => {
-        res.status(204).end()
-      })
-      .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
     const { description, link, vid_id } = req.body;

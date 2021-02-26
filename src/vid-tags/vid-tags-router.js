@@ -52,6 +52,26 @@ vidTagsRouter
           .status(201)
           .end()
     }
+  })
+  .delete(requireAuth, jsonParser, (req, res, next) => {
+    const delTags = req.body;
+    let count = 0;
+
+    delTags.forEach(tag => {
+      VidTagsService.deleteVidTag(
+        req.app.get('db'),
+        tag
+      )
+      .then(e => {
+        count++;
+      });
+    })
+
+    if(count === delTags.length) {
+      return res
+          .status(204)
+          .end()
+    }
   });
 
 vidTagsRouter
@@ -74,16 +94,6 @@ vidTagsRouter
   })
   .get((req, res, next) => {
     res.json(serializeVidTags(res.vidtag))
-  })
-  .delete((req, res, next) => {
-    VidTagsService.deleteVidTag(
-      req.app.get('db'),
-      req.params.vidtag_id
-    )
-      .then(numRowsAffected => {
-        res.status(204).end()
-      })
-      .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
     const { vid_id, tag_id } = req.body;
