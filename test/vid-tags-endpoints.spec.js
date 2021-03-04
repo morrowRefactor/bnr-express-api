@@ -3,6 +3,9 @@ const app = require('../src/app');
 const { makeVidTagsArray, makeMaliciousVidTag } = require('./vid-tags.fixtures');
 const { makeTagsArray } = require('./tags.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
+const { makeUsersArray } = require('./users.fixtures');
+const helpers = require('./test-helpers');
+const jwt = require('jsonwebtoken');
 
 describe('Video Tags Endpoints', function() {
   let db;
@@ -19,9 +22,9 @@ describe('Video Tags Endpoints', function() {
 
   after('disconnect from db', () => db.destroy());
 
-  before('clean the table', () => db.raw('TRUNCATE videos, tags, vid_tags RESTART IDENTITY CASCADE'));
+  before('clean the table', () => db.raw('TRUNCATE users, videos, tags, vid_tags RESTART IDENTITY CASCADE'));
 
-  afterEach('cleanup',() => db.raw('TRUNCATE videos, tags, vid_tags RESTART IDENTITY CASCADE'));
+  afterEach('cleanup',() => db.raw('TRUNCATE users,videos, tags, vid_tags RESTART IDENTITY CASCADE'));
 
   describe(`GET /api/vid-tags`, () => {
     context(`Given no video tags`, () => {
@@ -105,6 +108,16 @@ describe('Video Tags Endpoints', function() {
   describe(`POST /api/vid-tags`, () => {
     const testVideos = makeVideosArray();
     const testTags = makeTagsArray();
+    const testUsers = makeUsersArray();
+
+    function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+      const token = jwt.sign({ id: user.id }, secret, {
+        subject: user.email,
+        algorithm: 'HS256',
+      });
+
+      return `Bearer ${token}`
+    }
 
     beforeEach('insert videos and tags', () => {
       return db
@@ -115,38 +128,42 @@ describe('Video Tags Endpoints', function() {
                 .into('tags')
                 .insert(testTags)
         })
-    });
-
-    it(`creates a video tag, responding with 201 and the new video tag`, () => {
-      const newVideoTag = {
-        vid_id: 2,
-        tags: [ 1, 2, 3 ]
-      };
-
-      return supertest(app)
-        .post('/api/vid-tags')
-        .send(newVideoTag)
-        .expect(201)
-        .expect(res => {
-          expect(res.body.tags).to.eql(newVideoTag.tags)
-          expect(res.body).to.have.property('vid_id')
-          expect(res.headers.location).to.eql(`/api/vid-tags/${newVideoTag.tags[0]}`)
+        .then(() => {
+          helpers.seedUsers(db, testUsers)
         })
     });
 
-    const requiredFields = [ 'vid_id', 'tags' ];
+    it(`creates a video tag, responding with 201 and the new video tag`, () => {
+      const newVideoTag = [{
+        vid_id: 2,
+        tag_id: 1
+      },
+      {
+        vid_id: 3,
+        tag_id: 2
+      }];
+
+      return supertest(app)
+        .post('/api/vid-tags')
+        .set('Authorization', makeAuthHeader(testUsers[0]))
+        .send(newVideoTag)
+        .expect(201)
+    });
+
+    const requiredFields = [ 'vid_id', 'tag_id' ];
 
     requiredFields.forEach(field => {
-        const newVideoTag = {
+        const newVideoTag = [{
             vid_id: 2,
-            tags: [ 1, 2 ]
-          };
+            tag_id: 2
+          }];
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-        delete newVideoTag[field]
+        delete newVideoTag[0][field]
 
         return supertest(app)
           .post('/api/vid-tags')
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .send(newVideoTag)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -155,7 +172,7 @@ describe('Video Tags Endpoints', function() {
     });
   });
 
-  describe(`DELETE /api/vid-tags/:vidtag_id`, () => {
+  describe(`DELETE /api/vid-tags`, () => {
     context(`Given no video tags`, () => {
       it(`responds with 404`, () => {
         const vidtagId = 123456
@@ -169,6 +186,16 @@ describe('Video Tags Endpoints', function() {
       const testVideos = makeVideosArray();
       const testTags = makeTagsArray();
       const testVidTags = makeVidTagsArray();
+      const testUsers = makeUsersArray();
+
+      function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, {
+          subject: user.email,
+          algorithm: 'HS256',
+        });
+
+        return `Bearer ${token}`
+      }
 
       beforeEach('insert video tags', () => {
         return db
@@ -184,19 +211,19 @@ describe('Video Tags Endpoints', function() {
                 .into('vid_tags')
                 .insert(testVidTags)
           })
+          .then(() => {
+            helpers.seedUsers(db, testUsers)
+          })
       });
 
       it('responds with 204 and removes the video tag', () => {
-        const idToRemove = 2
-        const expectedVidTag = testVidTags.filter(vidtag => vidtag.id !== idToRemove)
+        const idToRemove = [ 1, 2 ];
+        const expectedVidTag = testVidTags.filter(vidtag => vidtag.id !== idToRemove);
         return supertest(app)
-          .delete(`/api/vid-tags/${idToRemove}`)
+          .delete(`/api/vid-tags`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
+          .send(idToRemove)
           .expect(204)
-          .then(res =>
-            supertest(app)
-              .get(`/api/vid-tags`)
-              .expect(expectedVidTag)
-          )
       });
     });
   });

@@ -90,6 +90,7 @@ function makeMaliciousVidResource() {
     }];
     const expectedVidResource = [{
         ...maliciousVidResource,
+        id: 911,
         description: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
         link: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
         vid_id: 2

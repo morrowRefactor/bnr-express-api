@@ -1,7 +1,9 @@
 const knex = require('knex');
 const app = require('../src/app');
-const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures');
+const { makeUsersArray, makeMaliciousUser, usersSansPassword } = require('./users.fixtures');
 const { expect } = require('chai');
+const helpers = require('./test-helpers');
+const jwt = require('jsonwebtoken');
 
 describe('Users Endpoints', function() {
   let db;
@@ -33,6 +35,7 @@ describe('Users Endpoints', function() {
 
     context('Given there are users in the database', () => {
       const testUsers = makeUsersArray();
+      const sansPassUsers = usersSansPassword();
 
       beforeEach('insert users', () => {
         return db
@@ -43,10 +46,10 @@ describe('Users Endpoints', function() {
       it('responds with 200 and all of the users', () => {
         return supertest(app)
           .get('/api/users')
-          .expect(200, testUsers)
+          .expect(200, sansPassUsers)
         });
     });
-
+    
     context(`Given an XSS attack user`, () => {
       const { maliciousUser, expectedUser } = makeMaliciousUser();
 
@@ -62,7 +65,6 @@ describe('Users Endpoints', function() {
           .expect(200)
           .expect(res => {
             expect(res.body[0].name).to.eql(expectedUser.name)
-            expect(res.body[0].password).to.eql(expectedUser.password)
           })
       });
     });
@@ -80,6 +82,7 @@ describe('Users Endpoints', function() {
 
     context('Given there are users in the database', () => {
       const testUsers = makeUsersArray();
+      const sansPassUsers = usersSansPassword();
 
       beforeEach('insert users', () => {
         return db
@@ -89,7 +92,7 @@ describe('Users Endpoints', function() {
 
       it('responds with 200 and the specified user', () => {
         const uid = 2
-        const expectedUser = testUsers[uid - 1]
+        const expectedUser = sansPassUsers[uid - 1]
         return supertest(app)
           .get(`/api/users/${uid}`)
           .expect(200, expectedUser)
@@ -111,7 +114,6 @@ describe('Users Endpoints', function() {
           .expect(200)
           .expect(res => {
             expect(res.body.name).to.eql(expectedUser.name)
-            expect(res.body.password).to.eql(expectedUser.password)
           })
       });
     });
@@ -122,7 +124,9 @@ describe('Users Endpoints', function() {
     it(`creates a user, responding with 201 and the new user`, () => {
       const newUser = {
         name: 'test user',
-        password: 'somepassword12!'
+        email: 'someemail@gmail.com',
+        password: 'Somepassword12!',
+        joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
       };
 
       return supertest(app)
@@ -131,22 +135,18 @@ describe('Users Endpoints', function() {
         .expect(201)
         .expect(res => {
           expect(res.body.name).to.eql(newUser.name)
-          expect(res.body.password).to.eql(newUser.password)
           expect(res.body).to.have.property('id')
+          expect(res.body).to.have.property('authToken')
           expect(res.headers.location).to.eql(`/api/users/${res.body.id}`)
         })
-        .then(res =>
-          supertest(app)
-            .get(`/api/users/${res.body.id}`)
-            .expect(res.body)
-        )
     });
 
-    const requiredFields = ['name', 'password'];
+    const requiredFields = ['name', 'password', 'email'];
 
     requiredFields.forEach(field => {
         const newUser = {
             name: 'test user',
+            email: 'someemail@gmail.com',
             password: 'somepassword12!'
         };
 
@@ -170,7 +170,6 @@ describe('Users Endpoints', function() {
         .expect(201)
         .expect(res => {
             expect(res.body.name).to.eql(expectedUser.name)
-            expect(res.body.password).to.eql(expectedUser.password)
         })
     });
   });
@@ -187,18 +186,27 @@ describe('Users Endpoints', function() {
 
     context('Given there are users in the database', () => {
       const testUsers = makeUsersArray();
+      const sansPassUsers = usersSansPassword();
 
-      beforeEach('insert users', () => {
-        return db
-          .into('users')
-          .insert(testUsers)
+      function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, {
+          subject: user.email,
+          algorithm: 'HS256',
+        });
+
+        return `Bearer ${token}`
+      }
+
+      beforeEach('insert videos and users', () => {
+        helpers.seedUsers(db, testUsers)
       });
 
       it('responds with 204 and removes the user', () => {
         const idToRemove = 2
-        const expectedUser = testUsers.filter(user => user.id !== idToRemove)
+        const expectedUser = sansPassUsers.filter(user => user.id !== idToRemove)
         return supertest(app)
           .delete(`/api/users/${idToRemove}`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .expect(204)
           .then(res =>
             supertest(app)
@@ -209,10 +217,10 @@ describe('Users Endpoints', function() {
     });
   });
 
-  describe(`PATCH /api/userss/:user_id`, () => {
+  describe(`PATCH /api/users/:user_id`, () => {
     context(`Given no users`, () => {
       it(`responds with 404`, () => {
-        const uid = 123
+        const uid = 123;
         return supertest(app)
           .delete(`/api/users/${uid}`)
           .expect(404, { error: { message: `User doesn't exist` } })
@@ -221,25 +229,41 @@ describe('Users Endpoints', function() {
 
     context('Given there are users in the database', () => {
       const testUsers = makeUsersArray();
+      const sansPassUsers = usersSansPassword();
+
+      function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, {
+          subject: user.email,
+          algorithm: 'HS256',
+        });
+
+        return `Bearer ${token}`
+      }
 
       beforeEach('insert users', () => {
-        return db
-          .into('users')
-          .insert(testUsers)
+        helpers.seedUsers(db, testUsers)
       });
-
+      
       it('responds with 204 and updates the user', () => {
         const idToUpdate = 2;
         const updateUser = {
+          id: 2,
           name: 'updated name',
-          password: 'Updatedpassword12!'
+          about: 'some new about text',
+          email: 'someemail@gmail.com',
+          password: 'Something12!'
+        };
+        const sansPassUser = {
+          name: 'updated name',
+          about: 'some new about text'
         };
         const expectedUser = {
-          ...testUsers[idToUpdate - 1],
-          ...updateUser
+          ...sansPassUsers[idToUpdate - 1],
+          ...sansPassUser
         };
         return supertest(app)
           .patch(`/api/users/${idToUpdate}`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .send(updateUser)
           .expect(204)
           .then(res =>
@@ -248,41 +272,18 @@ describe('Users Endpoints', function() {
               .expect(expectedUser)
           )
       });
-
+      
       it(`responds with 400 when no required fields supplied`, () => {
-        const idToUpdate = 2
+        const idToUpdate = 2;        
         return supertest(app)
           .patch(`/api/users/${idToUpdate}`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
-              message: `Request body must contain a name and password`
+              message: `Request body must contain an id`
             }
           })
-      });
-
-      it(`responds with 204 when updating only a subset of fields`, () => {
-        const idToUpdate = 2;
-        const updateUser = {
-          name: 'updated name',
-        };
-        const expectedUser = {
-          ...testUsers[idToUpdate - 1],
-          ...updateUser
-        };
-
-        return supertest(app)
-          .patch(`/api/users/${idToUpdate}`)
-          .send({
-            ...updateUser,
-            fieldToIgnore: 'should not be in GET response'
-          })
-          .expect(204)
-          .then(res =>
-            supertest(app)
-              .get(`/api/users/${idToUpdate}`)
-              .expect(expectedUser)
-          )
       });
     });
     });

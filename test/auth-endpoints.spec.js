@@ -31,17 +31,17 @@ describe('Auth Endpoints', function() {
       )
     )
     
-    const requiredFields = ['name', 'password']
+    const requiredFields = ['email', 'password'];
 
     requiredFields.forEach(field => {
       
       const loginAttemptBody = {
-        name: testUser.name,
+        email: testUser.email,
         password: testUser.password,
       }
       
       it(`responds with 400 required error when '${field}' is missing`, () => {
-          delete loginAttemptBody[field]
+          delete loginAttemptBody[field];
 
           return supertest(app)
             .post('/api/auth/login')
@@ -53,24 +53,24 @@ describe('Auth Endpoints', function() {
     })
       
     it(`responds 400 'invalid name or password' when bad name`, () => {
-      const userInvalidUser = { name: 'user-not', password: 'existy' }
+      const userInvalidUser = { email: 'user-not', password: 'existy' }
       return supertest(app)
         .post('/api/auth/login')
         .send(userInvalidUser)
-        .expect(400, { error: `Incorrect name or password` })
+        .expect(400, { error: `Incorrect email or password` })
     })
     
     it(`responds 400 'invalid name or password' when bad password`, () => {
-      const userInvalidPass = { name: testUser.name, password: 'incorrect' }
+      const userInvalidPass = { email: testUser.name, password: 'incorrect' }
       return supertest(app)
         .post('/api/auth/login')
         .send(userInvalidPass)
-        .expect(400, { error: `Incorrect name or password` })
+        .expect(400, { error: `Incorrect email or password` })
     })
     
     it(`responds 200 and JWT auth token using secret when valid credentials`, () => {
       const userValidCreds = {
-        name: testUser.name,
+        email: testUser.email,
         password: testUser.password,
       }
       
@@ -78,7 +78,7 @@ describe('Auth Endpoints', function() {
         { id: testUser.id },
         process.env.JWT_SECRET,
         {
-          subject: testUser.name,
+          subject: testUser.email,
           algorithm: 'HS256',
         }
       );

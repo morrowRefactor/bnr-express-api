@@ -1,9 +1,11 @@
 const knex = require('knex');
 const app = require('../src/app');
+const { expect } = require('chai');
 const { makeCommentsArray, makeMaliciousComment } = require('./comments.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
 const { makeUsersArray } = require('./users.fixtures');
 const helpers = require('./test-helpers');
+const jwt = require('jsonwebtoken');
 
 describe('Comments Endpoints', function() {
   let db;
@@ -44,7 +46,7 @@ describe('Comments Endpoints', function() {
           .insert(testVideos)
           .then(() => {
             return db
-              .into(users)
+              .into('users')
               .insert(testUsers)
           })
           .then(() => {
@@ -175,9 +177,13 @@ describe('Comments Endpoints', function() {
     const testVideos = makeVideosArray();
     const testUsers = makeUsersArray();
 
-    function makeAuthHeader(user) {
-      const token = Buffer.from(`${user.name}:${user.password}`).toString('base64')
-      return `Basic ${token}`
+    function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+      const token = jwt.sign({ id: user.id }, secret, {
+        subject: user.email,
+        algorithm: 'HS256',
+      });
+
+      return `Bearer ${token}`
     }
 
     beforeEach('insert videos and users', () => {
@@ -189,19 +195,26 @@ describe('Comments Endpoints', function() {
         })
     });
     
-    it(`responds 401 'Unauthorized request' when invalid user`, () => {
-      const userInvalidPass = { name: 'wronguser', password: 'wrong' };
+    it(`responds 401 'Missing bearer token' when no bearer token`, () => {
       return supertest(app)
         .post('/api/comments')
-        .set('Authorization', makeAuthHeader(userInvalidPass))
+        .expect(401, { error: `Missing bearer token` })
+    });
+
+    it(`responds 401 'Unauthorized request' when invalid JWT secret`, () => {
+      const validUser = testUsers[0];
+      const invalidSecret = 'bad-secret';
+      return supertest(app)
+        .post('/api/comments')
+        .set('Authorization', makeAuthHeader(validUser, invalidSecret))
         .expect(401, { error: `Unauthorized request` })
     });
     
-    it(`responds 401 'Unauthorized request' when invalid password`, () => {
-      const userInvalidPass = { name: testUsers[0].name, password: 'wrong' };
+    it(`responds 401 'Unauthorized request' when invalid sub in payload`, () => {
+      const invalidUser = { email: 'user-not-existy', id: 1 };
       return supertest(app)
         .post('/api/comments')
-        .set('Authorization', makeAuthHeader(userInvalidPass))
+        .set('Authorization', makeAuthHeader(invalidUser))
         .expect(401, { error: `Unauthorized request` })
     });
     
@@ -209,6 +222,7 @@ describe('Comments Endpoints', function() {
       const newComment = {
         comment: 'Test new comment',
         vid_id: 1,
+        uid: 1,
         date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
       };
       
@@ -231,12 +245,13 @@ describe('Comments Endpoints', function() {
         )
     });
     
-    const requiredFields = ['comment', 'vid_id', 'date_posted'];
+    const requiredFields = ['comment', 'vid_id', 'date_posted', 'uid'];
 
     requiredFields.forEach(field => {
         const newComment = {
             comment: 'Test new comment',
             vid_id: 1,
+            uid: 1,
             date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
           };
 
@@ -289,9 +304,7 @@ describe('Comments Endpoints', function() {
           .into('videos')
           .insert(testVideos)
           .then(() => {
-            return db
-              .into('users')
-              .insert(testUsers)
+            helpers.seedUsers(db, testUsers)
         })
           .then(() => {
               return db
@@ -300,11 +313,21 @@ describe('Comments Endpoints', function() {
           })
       });
 
+      function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, {
+          subject: user.email,
+          algorithm: 'HS256',
+        });
+  
+        return `Bearer ${token}`
+      }
+
       it('responds with 204 and removes the comment', () => {
         const idToRemove = 2
         const expectedComment = testComments.filter(com => com.id !== idToRemove)
         return supertest(app)
           .delete(`/api/comments/${idToRemove}`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .expect(204)
           .then(res =>
             supertest(app)

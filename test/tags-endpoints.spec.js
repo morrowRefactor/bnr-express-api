@@ -1,7 +1,10 @@
 const knex = require('knex');
 const app = require('../src/app');
 const { makeTagsArray, makeMaliciousTag } = require('./tags.fixtures');
+const { makeUsersArray } = require('./users.fixtures');
 const { expect } = require('chai');
+const helpers = require('./test-helpers');
+const jwt = require('jsonwebtoken');
 
 describe('Tags Endpoints', function() {
   let db;
@@ -18,9 +21,9 @@ describe('Tags Endpoints', function() {
 
   after('disconnect from db', () => db.destroy());
 
-  before('clean the table', () => db.raw('TRUNCATE tags RESTART IDENTITY CASCADE'));
+  before('clean the table', () => db.raw('TRUNCATE users, tags RESTART IDENTITY CASCADE'));
 
-  afterEach('cleanup',() => db.raw('TRUNCATE tags RESTART IDENTITY CASCADE'));
+  afterEach('cleanup',() => db.raw('TRUNCATE users, tags RESTART IDENTITY CASCADE'));
 
   describe(`GET /api/tags`, () => {
     context(`Given no tags`, () => {
@@ -116,56 +119,31 @@ describe('Tags Endpoints', function() {
   });
 
   describe(`POST /api/tags`, () => {
+    const testUsers = makeUsersArray();
+
+    function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+      const token = jwt.sign({ id: user.id }, secret, {
+        subject: user.email,
+        algorithm: 'HS256',
+      });
+
+      return `Bearer ${token}`
+    }
+
+    beforeEach('insert videos and users', () => {
+      helpers.seedUsers(db, testUsers)
+    });
 
     it(`creates a tag, responding with 201 and the new tag`, () => {
-      const newTag = {
-        tag: 'test tag',
-      };
+      const newTag = [
+        'test tag', 'another test tag'
+      ];
 
       return supertest(app)
         .post('/api/tags')
+        .set('Authorization', makeAuthHeader(testUsers[0]))
         .send(newTag)
         .expect(201)
-        .expect(res => {
-          expect(res.body.tag).to.eql(newTag.tag)
-          expect(res.body).to.have.property('id')
-          expect(res.headers.location).to.eql(`/api/tags/${res.body.id}`)
-        })
-        .then(res =>
-          supertest(app)
-            .get(`/api/tags/${res.body.id}`)
-            .expect(res.body)
-        )
-    });
-
-    const requiredFields = ['tag'];
-
-    requiredFields.forEach(field => {
-        const newTag = {
-            tag: 'test tag'
-        };
-
-      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-        delete newTag[field]
-
-        return supertest(app)
-          .post('/api/tags')
-          .send(newTag)
-          .expect(400, {
-            error: { message: `Missing '${field}' in request body` }
-          })
-      });
-    });
-
-    it('removes XSS attack content from response', () => {
-      const { maliciousTag, expectedTag } = makeMaliciousTag();
-      return supertest(app)
-        .post(`/api/tags`)
-        .send(maliciousTag)
-        .expect(201)
-        .expect(res => {
-            expect(res.body.tag).to.eql(expectedTag.tag)
-        })
     });
   });
 

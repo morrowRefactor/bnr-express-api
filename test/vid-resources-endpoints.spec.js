@@ -3,6 +3,9 @@ const app = require('../src/app');
 const { expect } = require('chai');
 const { makeVidResourcesArray, makeMaliciousVidResource } = require('./vid-resources.fixtures');
 const { makeVideosArray } = require('./videos.fixtures');
+const { makeUsersArray } = require('./users.fixtures');
+const helpers = require('./test-helpers');
+const jwt = require('jsonwebtoken');
 
 describe('Video Resources Endpoints', function() {
   let db;
@@ -65,7 +68,7 @@ describe('Video Resources Endpoints', function() {
           .then(() => {
             return db   
               .into('vid_resources')
-              .insert([ maliciousVidResource ])
+              .insert([ maliciousVidResource[0] ])
           })
       });
 
@@ -74,9 +77,9 @@ describe('Video Resources Endpoints', function() {
           .get(`/api/vid-resources`)
           .expect(200)
           .expect(res => {
-            expect(res.body[0].description).to.eql(expectedVidResource.description)
-            expect(res.body[0].link).to.eql(expectedVidResource.link)
-            expect(res.body[0].vid_id).to.eql(expectedVidResource.vid_id)
+            expect(res.body[0].description).to.eql(expectedVidResource[0].description)
+            expect(res.body[0].link).to.eql(expectedVidResource[0].link)
+            expect(res.body[0].vid_id).to.eql(expectedVidResource[0].vid_id)
           })
       });
     });
@@ -127,29 +130,36 @@ describe('Video Resources Endpoints', function() {
           .then(() => {
             return db
               .into('vid_resources')
-              .insert([ maliciousVidResource ])
+              .insert([ maliciousVidResource[0] ])
           })
       });
 
       it('removes XSS attack content', () => {
         return supertest(app)
-          .get(`/api/vid-resources/${maliciousVidResource.id}`)
+          .get(`/api/vid-resources/${maliciousVidResource[0].id}`)
           .expect(200)
           .expect(res => {
-            expect(res.body.description).to.eql(expectedVidResource.description)
-            expect(res.body.link).to.eql(expectedVidResource.link)
+            expect(res.body.description).to.eql(expectedVidResource[0].description)
+            expect(res.body.link).to.eql(expectedVidResource[0].link)
           })
       });
     });
   });
 
   describe(`POST /api/vid-resources`, () => {
-    const testVideos = makeVideosArray();
+    const testUsers = makeUsersArray();
 
-    beforeEach('insert videos', () => {
-      return db
-        .into('videos')
-        .insert(testVideos)
+    function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+      const token = jwt.sign({ id: user.id }, secret, {
+        subject: user.email,
+        algorithm: 'HS256',
+      });
+
+      return `Bearer ${token}`
+    }
+
+    beforeEach('insert videos and users', () => {
+      helpers.seedUsers(db, testUsers)
     });
 
     it(`creates a video resource, responding with 201 and the new video resource`, () => {
@@ -168,14 +178,9 @@ describe('Video Resources Endpoints', function() {
 
       return supertest(app)
         .post('/api/vid-resources')
+        .set('Authorization', makeAuthHeader(testUsers[0]))
         .send(newVidResource)
         .expect(201)
-        .expect(res => {
-          expect(res.body.description).to.eql(newVidResource[0].description)
-          expect(res.body.link).to.eql(newVidResource[0].link)
-          expect(res.body.vid_id).to.eql(newVidResource[0].vid_id)
-          expect(res.headers.location).to.eql(`/api/vid-resources/${newVidResource[0].vid_id}`)
-        })
     });
 
     const requiredFields = ['description', 'link', 'vid_id'];
@@ -192,24 +197,12 @@ describe('Video Resources Endpoints', function() {
 
         return supertest(app)
           .post('/api/vid-resources')
+          .set('Authorization', makeAuthHeader(testUsers[0]))
           .send(newVidResource)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           })
       });
-    });
-
-    it('removes XSS attack content from response', () => {
-      const { maliciousVidResource, expectedVidResource } = makeMaliciousVidResource();
-      return supertest(app)
-        .post(`/api/vid-resources`)
-        .send(maliciousVidResource)
-        .expect(201)
-        .expect(res => {
-            expect(res.body.description).to.eql(expectedVidResource[0].description)
-            expect(res.body.link).to.eql(expectedVidResource[0].link)
-            expect(res.body.vid_id).to.eql(expectedVidResource[0].vid_id)
-        })
     });
   });
 
@@ -226,6 +219,15 @@ describe('Video Resources Endpoints', function() {
     context('Given there are video resources in the database', () => {
       const testVideos = makeVideosArray();
       const testVidResources = makeVidResourcesArray();
+      const testUsers = makeUsersArray();
+      function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, {
+          subject: user.email,
+          algorithm: 'HS256',
+        });
+  
+        return `Bearer ${token}`
+      }
 
       beforeEach('insert video resources', () => {
         return db
@@ -236,19 +238,18 @@ describe('Video Resources Endpoints', function() {
                 .into('vid_resources')
                 .insert(testVidResources)
           })
+          .then(() => {
+            helpers.seedUsers(db, testUsers)
+          })
       });
 
       it('responds with 204 and removes the video resource', () => {
-        const idToRemove = 2
-        const expectedVidResource = testVidResources.filter(vid => vid.id !== idToRemove)
+        const idToRemove = [ 1, 2 ];
         return supertest(app)
-          .delete(`/api/vid-resources/${idToRemove}`)
+          .delete(`/api/vid-resources`)
+          .set('Authorization', makeAuthHeader(testUsers[0]))
+          .send(idToRemove)
           .expect(204)
-          .then(res =>
-            supertest(app)
-              .get(`/api/vid-resources`)
-              .expect(expectedVidResource)
-          )
       });
     });
   });

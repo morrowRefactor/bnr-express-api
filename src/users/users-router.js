@@ -8,12 +8,18 @@ const { requireAuth } = require('../middleware/jwt-auth');
 const usersRouter = express.Router();
 const jsonParser = express.json();
 
+function adjDate(dte) {
+  let d = dte;
+  d.setHours(dte.getHours() - 8);
+  return d.toISOString('en', { timeZone: 'UTC' });
+};
+
 const serializeUsers = u => ({
   id: u.id,
   name: xss(u.name),
   email: xss(u.email),
   about: xss(u.about),
-  joined_date: new Date(u.joined_date).toISOString('en', { timeZone: 'UTC' })
+  joined_date: adjDate(u.joined_date)
 });
 
 const serializeNewUser = u => ({
@@ -21,7 +27,7 @@ const serializeNewUser = u => ({
   name: xss(u.name),
   email: xss(u.email),
   about: xss(u.about),
-  joined_date: new Date(u.joined_date).toISOString('en', { timeZone: 'UTC' }),
+  joined_date: adjDate(u.joined_date),
   authToken: u.authToken
 });
 
@@ -36,9 +42,9 @@ usersRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { name, email, password } = req.body;
-    const newUser = { name, email, password };
-
+    const { name, email, password, joined_date} = req.body;
+    const newUser = { name, email, password, joined_date };
+    
     for (const [key, value] of Object.entries(newUser))
       if (value == null)
         return res.status(400).json({
@@ -62,7 +68,8 @@ usersRouter
             const newUser = {
               name,
               email,
-              password: hashedPassword
+              password: hashedPassword,
+              joined_date: req.body.joined_date
             };
 
             UsersService.insertUser(
@@ -118,9 +125,8 @@ usersRouter
   .patch(requireAuth, jsonParser, (req, res, next) => {
     const { id, name, about, email, password } = req.body;
     const userToUpdate = { id, name, about, email, password };
-
     
-    if(userToUpdate.password) {
+    if(req.body.password) {
       const reqFields = { id, email, password };
       const numberOfValues = Object.values(reqFields).filter(Boolean).length;
       if (numberOfValues === 0) {
@@ -136,6 +142,7 @@ usersRouter
             const updatedUser = {
               id: userToUpdate.id,
               name: userToUpdate.name,
+              about: userToUpdate.about,
               email: userToUpdate.email,
               password: hashedPassword
             };
@@ -152,7 +159,7 @@ usersRouter
         })
     }
     else {
-      if (!userToUpdate.id) {
+      if (!req.body.id) {
           return res.status(400).json({
           error: {
             message: `Request body must contain an id`
