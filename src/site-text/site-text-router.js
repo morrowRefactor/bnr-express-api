@@ -40,16 +40,19 @@ siteTextRouter
     
     updatedText.forEach(text => {
       const eachText = {
+        id: text.id,
         field: text.field,
         body: text.body
       };
 
-      SiteTextService.insertSiteText(
+      SiteTextService.updateSiteText(
         req.app.get('db'),
+        eachText.id,
         eachText
-      );
-
-      insertCount++;
+      )
+      .then(() => {
+        insertCount++;
+      });
     })
 
     if(insertCount === updatedText.length) {

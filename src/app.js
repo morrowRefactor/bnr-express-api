@@ -13,6 +13,7 @@ const commentsRouter = require('./comments/comments-router');
 const authRouter = require('./auth/auth-router');
 const resetPasswordRouter = require('./reset-password/reset-password-router');
 const contactUsRouter = require('./contact-us/contact-us-router');
+const siteTextRouter = require('./site-text/site-text-router');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/comments', commentsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/reset-password', resetPasswordRouter);
 app.use('/api/contact-us', contactUsRouter);
+app.use('/api/site-text', siteTextRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')
