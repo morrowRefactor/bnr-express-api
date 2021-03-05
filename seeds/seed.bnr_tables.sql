@@ -125,4 +125,15 @@ INSERT INTO comments (comment, date_posted, uid, vid_id)
     ('This video rocks!!', '2020-05-16', 4, 8)
 ;
 
+INSERT INTO site_text (field, body)
+  VALUES
+    ('homepage', 'We believe that the world has become too serious and we need to have a beer and a couple laughs.
+
+      See the news from a different aspect.'),
+    ('about_intro', 'We believe that the world has become too serious and we need to have a beer and a couple laughs. If you agree, please email me and let me know. If not, have a beer anyway.'),
+    ('about_mission', 'To take a news topic and try to find the underlying effects that might not have been considered. I will be drinking a beer to make the discussion more relaxed and comical.'),
+    ('about_company', 'All the shows produced here were mainly done at the CreaTV studios in San Jose, CA. This is a public access studio so all the actors, including myself, were not paid. It is truly working for the joy of it...and of course beer.'),
+    ('about_disclaimer', 'All the topics I talk about are either my opinion or obvious parody. I do not claim to be an expert on anything and that includes beer drinking. Any discussion or argument that uses my news as its basis is doomed to failure for which I am not responsible for.')
+;
+
 COMMIT;

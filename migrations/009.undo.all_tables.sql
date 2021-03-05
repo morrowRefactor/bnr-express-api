@@ -30,4 +30,6 @@ DROP TABLE IF EXISTS comments;
 
 DROP TABLE IF EXISTS temp_passwords;
 
+DROP TABLE IF EXISTS site_text;
+
 DROP TABLE IF EXISTS schemaversion;
