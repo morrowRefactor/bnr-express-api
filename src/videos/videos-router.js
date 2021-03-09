@@ -17,14 +17,12 @@ const serializeVideos = vid => ({
 videosRouter
   .route('/')
   .get((req, res, next) => {
-    res.json('check');
-    /*
     const knexInstance = req.app.get('db');
     VideosService.getAllVideos(knexInstance)
       .then(vid => {
         res.json(vid.map(serializeVideos))
       })
-      .catch(next)*/
+      .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
     const { title, description, youtube_id, date_posted } = req.body;
