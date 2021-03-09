@@ -18,13 +18,13 @@ videosRouter
   .route('/')
   .get((req, res, next) => {
     const knexInstance = req.app.get('db');
+    res.json(knexInstance);
+    /*
     VideosService.getAllVideos(knexInstance)
       .then(vid => {
-        res.json(vid)
-        /*
-        res.json(vid.map(serializeVideos))*/
+        res.json(vid.map(serializeVideos))
       })
-      .catch(next)
+      .catch(next)*/
   })
   .post(jsonParser, (req, res, next) => {
     const { title, description, youtube_id, date_posted } = req.body;
