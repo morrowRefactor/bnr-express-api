@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
-const { NODE_ENV } = require('./config');
+const { NODE_ENV, DATABASE_URL } = require('./config');
 const usersRouter = require('./users/users-router');
 const tagsRouter = require('./tags/tags-router');
 const videosRouter = require('./videos/videos-router');
@@ -36,7 +36,7 @@ app.use('/api/contact-us', contactUsRouter);
 app.use('/api/site-text', siteTextRouter);
 
 app.get('/', (req, res) => {
-  res.send('Hello, world! 22')
+  res.send(`Hello world!  ${DATABASE_URL}`)
 });
 
 app.use(function errorHandler(error, req, res, next) {
