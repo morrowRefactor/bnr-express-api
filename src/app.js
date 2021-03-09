@@ -36,7 +36,7 @@ app.use('/api/contact-us', contactUsRouter);
 app.use('/api/site-text', siteTextRouter);
 
 app.get('/', (req, res) => {
-  res.send(`Hello world!  ${DATABASE_URL}`)
+  res.send(`Hello world! 12  ${DATABASE_URL}`)
 });
 
 app.use(function errorHandler(error, req, res, next) {
