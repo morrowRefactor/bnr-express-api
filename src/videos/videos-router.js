@@ -18,7 +18,6 @@ videosRouter
   .route('/')
   .get((req, res, next) => {
     const knexInstance = req.app.get('db');
-    res.json(knexInstance);
     VideosService.getAllVideos(knexInstance)
       .then(vid => {
         res.json(vid.map(serializeVideos))
