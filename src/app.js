@@ -36,12 +36,12 @@ app.use('/api/contact-us', contactUsRouter);
 app.use('/api/site-text', siteTextRouter);
 
 app.get('/', (req, res) => {
-  res.send(`Hello world! 10.5`)
+  res.send(`Hello world! 10.6`)
 });
 
 app.use(function errorHandler(error, req, res, next) {
    let response
-   if (NODE_ENV === 'production') {
+   if (NODE_ENV === 'test') {
    response = { error: { message: 'server error' } }
      } else {
      console.error(error)
