@@ -36,7 +36,7 @@ app.use('/api/contact-us', contactUsRouter);
 app.use('/api/site-text', siteTextRouter);
 
 app.get('/', (req, res) => {
-  res.send(`Hello world! 10.1`)
+  res.send(`Hello world! 10.2`)
 });
 
 app.use(function errorHandler(error, req, res, next) {
