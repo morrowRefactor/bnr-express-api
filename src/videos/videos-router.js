@@ -1,6 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
+const { requireAuth } = require('../middleware/jwt-auth');
 const VideosService = require('./videos-service');
 
 const videosRouter = express.Router();
@@ -24,7 +25,7 @@ videosRouter
       })
       .catch(next)
   })
-  .post(jsonParser, (req, res, next) => {
+  .post(requireAuth, jsonParser, (req, res, next) => {
     const { title, description, youtube_id, date_posted } = req.body;
     const newVideo = { title, description, youtube_id, date_posted };
 
@@ -67,7 +68,7 @@ videosRouter
   .get((req, res, next) => {
     res.json(serializeVideos(res.vid))
   })
-  .delete((req, res, next) => {
+  .delete(requireAuth, (req, res, next) => {
     VideosService.deleteVideo(
       req.app.get('db'),
       req.params.vid_id
@@ -77,7 +78,7 @@ videosRouter
       })
       .catch(next)
   })
-  .patch(jsonParser, (req, res, next) => {
+  .patch(requireAuth, jsonParser, (req, res, next) => {
     const { title, description, youtube_id, date_posted } = req.body;
     const videoToUpdate = { title, description, youtube_id, date_posted };
 
