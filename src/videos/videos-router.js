@@ -28,6 +28,7 @@ videosRouter
   .post(requireAuth, jsonParser, (req, res, next) => {
     const { title, description, youtube_id, date_posted } = req.body;
     const newVideo = { title, description, youtube_id, date_posted };
+    console.log('nevid', newVideo)
 
     for (const [key, value] of Object.entries(newVideo))
       if (value == null)
