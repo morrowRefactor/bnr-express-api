@@ -190,9 +190,7 @@ describe('Comments Endpoints', function() {
       return db
         .into('videos')
         .insert(testVideos)
-        .then(() => {
-            helpers.seedUsers(db, testUsers)
-        })
+        .then(() => helpers.seedUsers(db, testUsers))
     });
     
     it(`responds 401 'Missing bearer token' when no bearer token`, () => {
@@ -245,7 +243,7 @@ describe('Comments Endpoints', function() {
         )
     });
     
-    const requiredFields = ['comment', 'vid_id', 'date_posted', 'uid'];
+    const requiredFields = ['comment', 'vid_id', 'date_posted'];
 
     requiredFields.forEach(field => {
         const newComment = {
@@ -266,6 +264,24 @@ describe('Comments Endpoints', function() {
             error: { message: `Missing '${field}' in request body` }
           })
       });
+    });
+
+    it(`posts as the logged-in user even if another uid is sent`, () => {
+      const newComment = {
+        comment: 'Trying to post as someone else',
+        vid_id: 1,
+        uid: 2,
+        date_posted: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
+      };
+
+      return supertest(app)
+        .post('/api/comments')
+        .set('Authorization', makeAuthHeader(testUsers[0]))
+        .send(newComment)
+        .expect(201)
+        .expect(res => {
+          expect(res.body.uid).to.eql(testUsers[0].id)
+        })
     });
 
     it('removes XSS attack content from response', () => {
@@ -303,9 +319,7 @@ describe('Comments Endpoints', function() {
         return db
           .into('videos')
           .insert(testVideos)
-          .then(() => {
-            helpers.seedUsers(db, testUsers)
-        })
+          .then(() => helpers.seedUsers(db, testUsers))
           .then(() => {
               return db
                 .into('comments')
@@ -321,6 +335,13 @@ describe('Comments Endpoints', function() {
   
         return `Bearer ${token}`
       }
+
+      it(`responds with 403 when deleting someone else's comment`, () => {
+        return supertest(app)
+          .delete(`/api/comments/2`)
+          .set('Authorization', makeAuthHeader(testUsers[1]))
+          .expect(403, { error: 'You can only delete your own comments' })
+      });
 
       it('responds with 204 and removes the comment', () => {
         const idToRemove = 2
@@ -358,15 +379,21 @@ describe('Comments Endpoints', function() {
           .into('videos')
           .insert(testVideos)
           .then(() => {
-            return db
-              .into('users')
-              .insert(testUsers)
+            return helpers.seedUsers(db, testUsers)
         })
           .then(() => {
               return db
                 .into('comments')
                 .insert(testComments)
           })
+      });
+
+      it(`responds with 403 when editing someone else's comment`, () => {
+        return supertest(app)
+          .patch(`/api/comments/2`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+          .send({ comment: 'not mine' })
+          .expect(403, { error: 'You can only edit your own comments' })
       });
 
       it('responds with 204 and updates the comment', () => {
@@ -383,6 +410,7 @@ describe('Comments Endpoints', function() {
         };
         return supertest(app)
           .patch(`/api/comments/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[2]))
           .send(updateComment)
           .expect(204)
           .then(res =>
@@ -396,10 +424,11 @@ describe('Comments Endpoints', function() {
         const idToUpdate = 2
         return supertest(app)
           .patch(`/api/comments/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[2]))
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
-              message: `Request body must contain a comment, user ID, video ID, and posted date`
+              message: `Request body must contain a comment, video ID, or posted date`
             }
           })
       });
@@ -416,6 +445,7 @@ describe('Comments Endpoints', function() {
 
         return supertest(app)
           .patch(`/api/comments/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[2]))
           .send({
             ...updateComment,
             fieldToIgnore: 'should not be in GET response'

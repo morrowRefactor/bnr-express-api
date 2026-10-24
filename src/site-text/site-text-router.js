@@ -1,7 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, requireAdmin } = require('../middleware/jwt-auth');
 const SiteTextService = require('./site-text-service');
 
 const siteTextRouter = express.Router();
@@ -23,7 +23,7 @@ siteTextRouter
       })
       .catch(next)
   })
-  .patch(requireAuth, jsonParser, (req, res, next) => {
+  .patch(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const updatedText = req.body;
     let insertCount = 0;
 

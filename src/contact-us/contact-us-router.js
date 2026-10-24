@@ -3,6 +3,7 @@ const xss = require('xss');
 const path = require('path');
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 const config = require('../config');
+const { escapeHtml } = require('../utils/escape-html');
 
 const contactUsRouter = express.Router();
 const jsonParser = express.json();
@@ -27,7 +28,7 @@ contactUsRouter
     let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     
     sendSmtpEmail.subject = "Contact Us Form Message";
-    sendSmtpEmail.htmlContent = `<html><body><p>New message submitted through Contact Us form.</p><p><strong>Name: </strong>${name}</p><p><strong>Email: </strong>${email}</p><p><strong>Message: </strong>${message}</p></body></html>`;
+    sendSmtpEmail.htmlContent = `<html><body><p>New message submitted through Contact Us form.</p><p><strong>Name: </strong>${escapeHtml(name)}</p><p><strong>Email: </strong>${escapeHtml(email)}</p><p><strong>Message: </strong>${escapeHtml(message)}</p></body></html>`;
     sendSmtpEmail.sender = {"name":"BNR Form Alert","email":"beerandnewsreport@gmail.com"};
     sendSmtpEmail.to = [{"email":"beerandnewsreport@gmail.com","name":"Beer and News Report"}];
     sendSmtpEmail.replyTo = {"email":"beerandnewsreport@gmail.com","name":"Beer and News Report"};

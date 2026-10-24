@@ -5,7 +5,7 @@ function makeUsersArray() {
         {
             id: 1,
             name: 'John Doe',
-            email: 'someemail@gmail.com',
+            email: 'user1@example.com',
             password: 'Something12!',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
@@ -13,7 +13,7 @@ function makeUsersArray() {
         {
             id: 2,
             name: 'Jane Doe',
-            email: 'someemail@gmail.com',
+            email: 'user2@example.com',
             password: 'Something12!',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
@@ -21,7 +21,7 @@ function makeUsersArray() {
         {
             id: 3,
             name: 'Joe Thornton',
-            email: 'someemail@gmail.com',
+            email: 'user3@example.com',
             password: 'Something12!',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
@@ -29,7 +29,7 @@ function makeUsersArray() {
         {
             id: 4,
             name: 'Brent Burns',
-            email: 'someemail@gmail.com',
+            email: 'user4@example.com',
             password: 'Something12!',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
@@ -42,28 +42,24 @@ function usersSansPassword() {
         {
             id: 1,
             name: 'John Doe',
-            email: 'someemail@gmail.com',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 2,
             name: 'Jane Doe',
-            email: 'someemail@gmail.com',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 3,
             name: 'Joe Thornton',
-            email: 'someemail@gmail.com',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         },
         {
             id: 4,
             name: 'Brent Burns',
-            email: 'someemail@gmail.com',
             about: '',
             joined_date: new Date('2020-01-22T16:28:32.615Z').toISOString('en', { timeZone: 'UTC' })
         }

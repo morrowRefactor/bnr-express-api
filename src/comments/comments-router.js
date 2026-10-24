@@ -2,7 +2,7 @@ const express = require('express');
 const xss = require('xss');
 const path = require('path');
 const CommentsService = require('./comments-service');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, isAdmin } = require('../middleware/jwt-auth');
 
 const commentsRouter = express.Router();
 const jsonParser = express.json();
@@ -26,8 +26,9 @@ commentsRouter
       .catch(next)
   })
   .post(requireAuth, jsonParser, (req, res, next) => {
-    const { uid, comment, vid_id, date_posted } = req.body;
-    const newComment = { uid, comment, vid_id, date_posted };
+    const { comment, vid_id, date_posted } = req.body;
+    // Always post as the logged-in user, whatever uid the request claims
+    const newComment = { uid: req.user.id, comment, vid_id, date_posted };
     
     for (const [key, value] of Object.entries(newComment))
       if (value == null)
@@ -70,6 +71,9 @@ commentsRouter
     res.json(serializeComments(res.com))
   })
   .delete(requireAuth, (req, res, next) => {
+    if (res.com.uid !== req.user.id && !isAdmin(req.user))
+      return res.status(403).json({ error: 'You can only delete your own comments' });
+
     CommentsService.deleteComment(
       req.app.get('db'),
       req.params.com_id
@@ -79,15 +83,18 @@ commentsRouter
       })
       .catch(next)
   })
-  .patch(jsonParser, (req, res, next) => {
-    const { comment, uid, vid_id, date_posted } = req.body;
-    const commentToUpdate = { comment, uid, vid_id, date_posted };
+  .patch(requireAuth, jsonParser, (req, res, next) => {
+    if (res.com.uid !== req.user.id)
+      return res.status(403).json({ error: 'You can only edit your own comments' });
+
+    const { comment, vid_id, date_posted } = req.body;
+    const commentToUpdate = { comment, vid_id, date_posted };
 
     const numberOfValues = Object.values(commentToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
         return res.status(400).json({
         error: {
-          message: `Request body must contain a comment, user ID, video ID, and posted date`
+          message: `Request body must contain a comment, video ID, or posted date`
         }
       });
     };

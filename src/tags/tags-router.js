@@ -1,7 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, requireAdmin } = require('../middleware/jwt-auth');
 const TagsService = require('./tags-service');
 
 const tagsRouter = express.Router();
@@ -22,7 +22,7 @@ tagsRouter
       })
       .catch(next)
   })
-  .post(requireAuth, jsonParser, (req, res, next) => {
+  .post(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const newTags = req.body;
     let tagIds = [];
 
@@ -69,7 +69,7 @@ tagsRouter
   .get((req, res, next) => {
     res.json(serializeTags(res.tag))
   })
-  .delete((req, res, next) => {
+  .delete(requireAuth, requireAdmin, (req, res, next) => {
     TagsService.deleteTag(
       req.app.get('db'),
       req.params.tag_id
@@ -79,7 +79,7 @@ tagsRouter
       })
       .catch(next)
   })
-  .patch(jsonParser, (req, res, next) => {
+  .patch(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const { tag } = req.body;
     const tagToUpdate = { tag };
 

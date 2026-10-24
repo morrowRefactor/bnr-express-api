@@ -13,15 +13,18 @@ const ResetPasswordService = {
                 return rows[0]
             })
     },
-    getById(knex, id) {
-       return knex.from('temp_passwords').select('*').where('id', id).first()
+    getTempPassByEmail(knex, email) {
+       return knex.from('temp_passwords').select('*').where('email', email).orderBy('created_at', 'desc').first()
     },
     getUserById(knex, id) {
         return knex.from('users').select('*').where('id', id).first()
     },
-    deleteTempPass(knex, id) {
+    getUserByEmail(knex, email) {
+        return knex.from('users').select('*').where('email', email).first()
+    },
+    deleteTempPassesForUser(knex, uid) {
         return knex('temp_passwords')
-            .where({ id })
+            .where({ uid })
             .delete()
     },
     hashPassword(password) {

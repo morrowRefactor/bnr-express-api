@@ -43,6 +43,15 @@ describe('Users Endpoints', function() {
           .insert(testUsers)
       });
 
+      it(`never includes email addresses in the public list`, () => {
+        return supertest(app)
+          .get('/api/users')
+          .expect(200)
+          .expect(res => {
+            res.body.forEach(user => expect(user).to.not.have.property('email'))
+          })
+      });
+
       it('responds with 200 and all of the users', () => {
         return supertest(app)
           .get('/api/users')
@@ -88,6 +97,25 @@ describe('Users Endpoints', function() {
         return db
           .into('users')
           .insert(testUsers)
+      });
+
+      it(`includes the email only for the account owner`, () => {
+        return supertest(app)
+          .get(`/api/users/2`)
+          .expect(200)
+          .expect(res => expect(res.body).to.not.have.property('email'))
+          .then(() =>
+            supertest(app)
+              .get(`/api/users/2`)
+              .set('Authorization', helpers.makeAuthHeader(testUsers[2]))
+              .expect(res => expect(res.body).to.not.have.property('email'))
+          )
+          .then(() =>
+            supertest(app)
+              .get(`/api/users/2`)
+              .set('Authorization', helpers.makeAuthHeader(testUsers[1]))
+              .expect(res => expect(res.body.email).to.eql(testUsers[1].email))
+          )
       });
 
       it('responds with 200 and the specified user', () => {
@@ -198,7 +226,14 @@ describe('Users Endpoints', function() {
       }
 
       beforeEach('insert videos and users', () => {
-        helpers.seedUsers(db, testUsers)
+        return helpers.seedUsers(db, testUsers)
+      });
+
+      it(`responds with 403 when deleting someone else's account`, () => {
+        return supertest(app)
+          .delete(`/api/users/2`)
+          .set('Authorization', makeAuthHeader(testUsers[2]))
+          .expect(403, { error: 'You can only delete your own account' })
       });
 
       it('responds with 204 and removes the user', () => {
@@ -241,7 +276,7 @@ describe('Users Endpoints', function() {
       }
 
       beforeEach('insert users', () => {
-        helpers.seedUsers(db, testUsers)
+        return helpers.seedUsers(db, testUsers)
       });
       
       it('responds with 204 and updates the user', () => {
@@ -250,7 +285,7 @@ describe('Users Endpoints', function() {
           id: 2,
           name: 'updated name',
           about: 'some new about text',
-          email: 'someemail@gmail.com',
+          email: 'user2@example.com',
           password: 'Something12!'
         };
         const sansPassUser = {
@@ -273,6 +308,30 @@ describe('Users Endpoints', function() {
           )
       });
       
+      it(`responds with 403 when editing someone else's account`, () => {
+        return supertest(app)
+          .patch(`/api/users/2`)
+          .set('Authorization', makeAuthHeader(testUsers[2]))
+          .send({ password: 'Hijacked12!' })
+          .expect(403, { error: 'You can only edit your own account' })
+      });
+
+      it(`lets users update their own account`, () => {
+        return supertest(app)
+          .patch(`/api/users/3`)
+          .set('Authorization', makeAuthHeader(testUsers[2]))
+          .send({ about: 'my own about text' })
+          .expect(204)
+      });
+
+      it(`responds with 400 when changing to an email another account uses`, () => {
+        return supertest(app)
+          .patch(`/api/users/3`)
+          .set('Authorization', makeAuthHeader(testUsers[2]))
+          .send({ email: testUsers[1].email })
+          .expect(400, { error: 'User email already taken' })
+      });
+
       it(`responds with 400 when no required fields supplied`, () => {
         const idToUpdate = 2;        
         return supertest(app)
@@ -281,7 +340,7 @@ describe('Users Endpoints', function() {
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
-              message: `Request body must contain an id`
+              message: `Request body must contain a name, about, email, or password`
             }
           })
       });

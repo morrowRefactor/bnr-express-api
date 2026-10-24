@@ -160,10 +160,20 @@ describe('Tags Endpoints', function() {
     context('Given there are tags in the database', () => {
       const testTags = makeTagsArray();
 
-      beforeEach('insert tags', () => {
+      const testUsers = makeUsersArray();
+
+      beforeEach('insert tags and users', () => {
         return db
           .into('tags')
           .insert(testTags)
+          .then(() => helpers.seedUsers(db, testUsers))
+      });
+
+      it(`responds with 403 when the user is not an admin`, () => {
+        return supertest(app)
+          .delete(`/api/tags/2`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[1]))
+          .expect(403, { error: 'Admin access required' })
       });
 
       it('responds with 204 and removes the tag', () => {
@@ -171,6 +181,7 @@ describe('Tags Endpoints', function() {
         const expectedTag = testTags.filter(tag => tag.id !== idToRemove)
         return supertest(app)
           .delete(`/api/tags/${idToRemove}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .expect(204)
           .then(res =>
             supertest(app)
@@ -194,10 +205,13 @@ describe('Tags Endpoints', function() {
     context('Given there are tags in the database', () => {
       const testTags = makeTagsArray();
 
-      beforeEach('insert tags', () => {
+      const testUsers = makeUsersArray();
+
+      beforeEach('insert tags and users', () => {
         return db
           .into('tags')
           .insert(testTags)
+          .then(() => helpers.seedUsers(db, testUsers))
       });
 
       it('responds with 204 and updates the tag', () => {
@@ -211,6 +225,7 @@ describe('Tags Endpoints', function() {
         };
         return supertest(app)
           .patch(`/api/tags/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send(updateTag)
           .expect(204)
           .then(res =>
@@ -224,6 +239,7 @@ describe('Tags Endpoints', function() {
         const idToUpdate = 2
         return supertest(app)
           .patch(`/api/tags/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
@@ -244,6 +260,7 @@ describe('Tags Endpoints', function() {
 
         return supertest(app)
           .patch(`/api/tags/${idToUpdate}`)
+          .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
           .send({
             ...updateTag,
             fieldToIgnore: 'should not be in GET response'

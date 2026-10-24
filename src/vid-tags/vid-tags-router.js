@@ -1,7 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, requireAdmin } = require('../middleware/jwt-auth');
 const VidTagsService = require('./vid-tags-service');
 
 const vidTagsRouter = express.Router();
@@ -23,7 +23,7 @@ vidTagsRouter
       })
       .catch(next)
   })
-  .post(requireAuth, jsonParser, (req, res, next) => {
+  .post(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const newVidTags = req.body;
     let tagcount = 0;
 
@@ -53,7 +53,7 @@ vidTagsRouter
           .end()
     }
   })
-  .delete(requireAuth, jsonParser, (req, res, next) => {
+  .delete(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const delTags = req.body;
     let count = 0;
 
@@ -95,7 +95,7 @@ vidTagsRouter
   .get((req, res, next) => {
     res.json(serializeVidTags(res.vidtag))
   })
-  .patch(jsonParser, (req, res, next) => {
+  .patch(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const { vid_id, tag_id } = req.body;
     const vidTagToUpdate = { vid_id, tag_id };
 

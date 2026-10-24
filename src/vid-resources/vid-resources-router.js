@@ -1,7 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const path = require('path');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, requireAdmin } = require('../middleware/jwt-auth');
 const VidResourcesService = require('./vid-resources-service');
 
 const vidResourcesRouter = express.Router();
@@ -24,7 +24,7 @@ vidResourcesRouter
       })
       .catch(next)
   })
-  .post(requireAuth, jsonParser, (req, res, next) => {
+  .post(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const newVidResources = req.body;
     let insertCount = 0;
     
@@ -60,7 +60,7 @@ vidResourcesRouter
         .end()
     }
   })
-  .delete(requireAuth, jsonParser, (req, res, next) => {
+  .delete(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const delResos = req.body;
     let count = 0;
 
@@ -102,7 +102,7 @@ vidResourcesRouter
   .get((req, res, next) => {
     res.json(serializeVidResources(res.vid))
   })
-  .patch(jsonParser, (req, res, next) => {
+  .patch(requireAuth, requireAdmin, jsonParser, (req, res, next) => {
     const { description, link, vid_id } = req.body;
     const videoToUpdate = { description, link, vid_id };
 

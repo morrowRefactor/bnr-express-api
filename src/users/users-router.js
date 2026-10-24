@@ -3,7 +3,7 @@ const xss = require('xss');
 const path = require('path');
 const UsersService = require('./users-service');
 const AuthService = require('../auth/auth-service');
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, optionalAuth, isAdmin } = require('../middleware/jwt-auth');
 
 const usersRouter = express.Router();
 const jsonParser = express.json();
@@ -17,10 +17,18 @@ function adjDate(dte) {
 const serializeUsers = u => ({
   id: u.id,
   name: xss(u.name),
-  email: xss(u.email),
   about: xss(u.about),
   joined_date: adjDate(u.joined_date)
 });
+
+const serializePrivateUser = u => ({
+  ...serializeUsers(u),
+  email: xss(u.email)
+});
+
+function canManageUser(reqUser, userId) {
+  return !!reqUser && (reqUser.id === userId || isAdmin(reqUser));
+};
 
 const serializeNewUser = u => ({
   id: u.id,
@@ -109,10 +117,14 @@ usersRouter
       })
       .catch(next)
   })
-  .get((req, res, next) => {
-    res.json(serializeUsers(res.user))
+  .get(optionalAuth, (req, res, next) => {
+    const serialize = canManageUser(req.user, res.user.id) ? serializePrivateUser : serializeUsers;
+    res.json(serialize(res.user))
   })
   .delete(requireAuth, (req, res, next) => {
+    if (!canManageUser(req.user, res.user.id))
+      return res.status(403).json({ error: 'You can only delete your own account' });
+
     UsersService.deleteUser(
       req.app.get('db'),
       req.params.user_id
@@ -123,60 +135,46 @@ usersRouter
       .catch(next)
   })
   .patch(requireAuth, jsonParser, (req, res, next) => {
-    const { id, name, about, email, password } = req.body;
-    const userToUpdate = { id, name, about, email, password };
-    
-    if(req.body.password) {
-      const reqFields = { id, email, password };
-      const numberOfValues = Object.values(reqFields).filter(Boolean).length;
-      if (numberOfValues === 0) {
-          return res.status(400).json({
-          error: {
-            message: `Request body must contain an id, email, and password`
-          }
-        });
-      };
+    if (!canManageUser(req.user, res.user.id))
+      return res.status(403).json({ error: 'You can only edit your own account' });
 
-      return UsersService.hashPassword(password)
-        .then(hashedPassword => {
-            const updatedUser = {
-              id: userToUpdate.id,
-              name: userToUpdate.name,
-              about: userToUpdate.about,
-              email: userToUpdate.email,
-              password: hashedPassword
-            };
+    const { name, about, email, password } = req.body;
+    const userToUpdate = { name, about, email };
 
-            UsersService.updateUser(
-              req.app.get('db'),
-              req.params.user_id,
-              updatedUser
-            )
-            .then(numRowsAffected => {
-              res.status(204).end()
-            })
-            .catch(next)
-        })
+    if (Object.values({ ...userToUpdate, password }).filter(Boolean).length === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must contain a name, about, email, or password`
+        }
+      });
+    };
+
+    if (password) {
+      const passwordError = UsersService.validatePassword(password);
+      if (passwordError)
+        return res.status(400).json({ error: passwordError });
     }
-    else {
-      if (!req.body.id) {
-          return res.status(400).json({
-          error: {
-            message: `Request body must contain an id`
-          }
-        });
-      };
 
-      UsersService.updateUser(
-        req.app.get('db'),
-        req.params.user_id,
-        userToUpdate
-      )
-      .then(numRowsAffected => {
-        res.status(204).end()
+    const db = req.app.get('db');
+    const emailCheck = (email && email !== res.user.email)
+      ? UsersService.hasUserWithUserEmail(db, email)
+      : Promise.resolve(false);
+
+    emailCheck
+      .then(emailTaken => {
+        if (emailTaken)
+          return res.status(400).json({ error: `User email already taken` });
+
+        return (password ? UsersService.hashPassword(password) : Promise.resolve(undefined))
+          .then(hashedPassword => {
+            // knex skips undefined fields, so anything not sent stays as it was
+            return UsersService.updateUser(db, res.user.id, { ...userToUpdate, password: hashedPassword })
+          })
+          .then(() => {
+            res.status(204).end()
+          })
       })
       .catch(next)
-    }
   });
 
 module.exports = usersRouter;
